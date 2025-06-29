@@ -1,0 +1,66 @@
+<div style="flex-direction: row; display: flex;">
+
+    <main>
+        <div class="container">
+
+
+        </div>
+
+    </main>
+
+    <aside>
+        <div class="right-box">
+
+            <div class="chat-container">
+                <div class="top">
+
+                </div>
+
+                <div class="mid">
+
+                </div>
+
+                <div class="bottom">
+                    <input type="text" placeholder="Type a message">
+                </div>
+            </div>
+
+        </div>
+
+    </aside>
+</div>
+
+<style>
+    .container {
+        width: 66vw;
+        height: 100vh;
+    }
+
+    .right-box {
+        width: 18vw;
+        height: 100vh;
+        flex-direction: column;
+        display: flex;
+        border-left: solid 2px #7e7e7e;
+
+        & .chat-container {
+            position: relative;
+            width: 100%;
+            height: 50%;
+            background-color: rgb(255, 212, 155);
+
+            & .bottom {
+                position: absolute;
+                bottom: 0;
+                width: 100%;
+                height: 14%;
+            }
+
+            & .bottom input {
+                width: 100%;
+                height: 100%;
+                /* background-color: aqua; */
+            }
+        }
+    }
+</style>

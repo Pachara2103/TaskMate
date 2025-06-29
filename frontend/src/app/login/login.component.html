@@ -1,0 +1,124 @@
+<style>
+    .login-container {
+        position: absolute;
+        margin: 80px;
+        bottom: 10px;
+        border-radius: 100px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+
+        background-color: #fff;
+        width: 40vw;
+        height: 80vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        & .login-box {
+            position: relative;
+            margin-bottom: 100px;
+            width: 55%;
+            height: 60%;
+            align-items: flex-start;
+            flex-direction: column;
+            display: flex;
+
+        }
+    }
+
+    .box {
+        flex-direction: column;
+        display: flex;
+        /* background-color: aqua; */
+        width: 100%;
+
+        & .input-box {
+            flex-direction: column;
+            /* background-color: #da8181; */
+            display: flex;
+            margin-bottom: 20px;
+        }
+
+        & .input-box input {
+            width: 98%;
+            height: 35px;
+            border-radius: 5px;
+            border: solid 1px #d1d1d1
+        }
+
+        & .input-box label {
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+    }
+
+    .button {
+        width: 100%;
+        height: 35px;
+        border-radius: 5px;
+        border: none;
+        background-color: #4a81e0;
+        color: #fff;
+        margin-bottom: 20px;
+        cursor: pointer;
+
+        &:hover {
+            background-color: #2469e0;
+        }
+    }
+
+    .google {
+        width: 100%;
+        height: 35px;
+        border-radius: 5px;
+        background-color: #fff;
+        border: solid 1px #d1d1d1;
+        cursor: pointer;
+
+        &:hover {
+            background-color: #d6d6d6;
+        }
+    }
+</style>
+
+<div class="login-container">
+
+    <div class="login-box">
+        <div [style.marginBottom.px]="signup ? 30 : 50"
+            style="flex-direction: column; display: flex; text-align: center; width: 100%;">
+            <label style="font-size: 40px; font-weight: bold;">{{signup ? "Sign up":"Login"}}</label>
+            <label style="font-size: 16px; color: #a1a1a1;">Please enter your detail</label>
+        </div>
+
+        <div class="box">
+
+            <div class="input-box">
+                <label> Email</label>
+                <input type="text" placeholder="example@gmail.com">
+            </div>
+
+            <div class="input-box">
+                <label> Password</label>
+                <input type="password">
+            </div>
+
+            <div *ngIf="signup" class="input-box">
+                <label> Confirm Password</label>
+                <input type="password">
+            </div>
+
+            <button class="button">{{signup?"Sign up":"Sign in"}}</button>
+            <button class="google">{{signup? "Sign up with Google":"Sign in with Google"}}</button>
+
+            <div style="flex-direction: row; display: flex; justify-content: center; margin: 10px;">
+                <label style="color: #a1a1a1;">{{signup? "Already have a account ?":"Don't have a account ?"}} </label>
+                <label (click)='showAlert()'
+                    style="text-decoration:underline; margin-left: 10px; color: #036cff; cursor: pointer;">
+                    {{signup? "Sign in":"Sign up"}}</label>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<img src="images/login.png" style="width: 100vw; height: 100vh;">
