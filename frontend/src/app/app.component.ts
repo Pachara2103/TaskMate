@@ -4,9 +4,7 @@ import { NavbarComponent } from './navbar/navbar.component';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { filter } from 'rxjs/operators';
 
-
 import { HttpClient } from '@angular/common/http';
-
 import { routes } from './app.routes';
 
 @Component({
