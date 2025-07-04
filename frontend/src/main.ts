@@ -2,6 +2,16 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
 import { AppComponent } from './app/app.component';
 
+import {
+  Chart,
+  ArcElement,
+  Tooltip,
+  Legend,
+  DoughnutController,
+  Title
+} from 'chart.js';
+
+Chart.register(ArcElement, Tooltip, Legend, DoughnutController, Title);
 
 bootstrapApplication(AppComponent, appConfig)
   .catch((err) => console.error(err));

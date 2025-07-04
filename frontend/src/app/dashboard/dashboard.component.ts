@@ -7,13 +7,12 @@ import { RouterLink, RouterOutlet } from '@angular/router';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [FormsModule, NgIf, NgFor,NgClass, ListComponent, RouterLink],
+  imports: [FormsModule, NgIf, NgFor, NgClass, ListComponent, RouterLink],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent {
   ws!: WebSocket;
-  Servercallback: string = '';
 
   chatMessage = "";
   test = ''
@@ -22,24 +21,40 @@ export class DashboardComponent {
   myTask = ['test']; teamTask = ['testteam task']
   recentTask = ['stupid project', 'test'];
 
-  barList = ["List","Dashboard", "Overview", "Timeline"]
+  barList = ["List", "Dashboard", "Overview", "Timeline"]
 
   barFocus = "";
   changeFocus(x: string) {
     this.barFocus = x;
   }
 
+  userId = "123";
+  message = "";
+  chatList: { fromSelf: boolean, userId: string, message: string }[] = [];
+
+
+
   ngOnInit() {
     this.barFocus = 'List'
-    this.ws = new WebSocket("ws://localhost:3000");
+    this.ws = new WebSocket("ws://localhost:3000?userId=123");
 
     this.ws.onopen = () => {
       console.log("Connected to socket");
     };
 
     this.ws.onmessage = (event) => {
-      this.Servercallback = event.data;
-      console.log("messsage===== ", event.data)
+      const data = JSON.parse(event.data);  // [userId, message]
+      const fromSelf = data[0] === this.userId;
+
+      console.log('fromself= ', fromSelf)
+
+      this.chatList.push({
+        fromSelf: fromSelf,
+        userId: data[0],
+        message: data[1]
+      });
+
+      console.log(`${fromSelf ? "You" : data[0]} say:`, data[1]);
     };
   }
 
@@ -49,13 +64,9 @@ export class DashboardComponent {
       console.log('cant send')
     }
     else {
-      this.ws.send(this.chatMessage);
-      console.log('send msg= ', this.chatMessage)
-      this.test = this.chatMessage;
+      this.ws.send(JSON.stringify({ "userId": `123`, "type": "message", "message":`${msg}` , "roomId": "NDU2OnRlc3Qgcm9vbQ"}));
       this.chatMessage = ""
     }
-
   }
-
 
 }

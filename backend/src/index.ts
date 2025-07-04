@@ -20,7 +20,7 @@ const connections = new Map<string, ServerWebSocket<any>>();
 
 function createRoomId(userId: string, roomName: string): string {
   const raw = `${userId}:${roomName}`;
-  return btoa(raw);
+  return btoa(roomName);
 }
 
 type WSData = {
@@ -69,10 +69,7 @@ Bun.serve({
 
       if (type === "create") {
         const { roomName, userId } = msg;
-        // const userRooms = new Map<string, Set<string>>();
-        // const roomMembers = new Map<string, Set<string>>();
-        // const roomIdtoName = new Map<string, string>();
-
+       
         if (!roomIdtoName.has(createRoomId(userId, roomName))) {
           userRooms.set(userId, new Set());
           userRooms.get(userId)!.add(createRoomId(userId, roomName));
@@ -80,10 +77,9 @@ Bun.serve({
           roomMembers.get(createRoomId(userId, roomName))!.add(userId); //เพิ้มตัวเองในห้อง
           roomIdtoName.set(createRoomId(userId, roomName), roomName);
         } else {
-          console.log(`this room name is already exist`);
+          console.log(`this room name is already exis`);
           return;
         }
-
         console.log(`user id=${userId} create  room:${roomName}`);
         console.log('roomem', roomMembers);
         console.log('userroom=  ', userRooms);
@@ -92,27 +88,30 @@ Bun.serve({
         const { roomId, friendId } = msg;
         if (!userRooms.has(friendId)) {
           userRooms.set(friendId, new Set());
-          userRooms.get(friendId)!.add(roomId);
-          roomMembers.get(roomId)!.add(friendId);
         }
-
         if (!userRooms.get(friendId)!.has(roomId)) {
           userRooms.get(friendId)!.add(roomId);
+
+          // แก้ตรงนี้
+          if (!roomMembers.has(roomId)) {
+            roomMembers.set(roomId, new Set());
+          }
           roomMembers.get(roomId)!.add(friendId);
         }
 
         console.log(`you invite ${friendId} to room= ${roomId}`)
         console.log('roomem inviteeeeeeeeeeee', roomMembers);
-        console.log('userroom inviteeeeeeeeeeee=  ', userRooms);
+        console.log('userroom inviteeeeeeeeeee=  ', userRooms);
       }
 
       if (type === "message") {
+        console.log('recieve message from client');
         const { userId, message, roomId } = msg;
 
         for (const friendId of roomMembers.get(roomId)!) {
           const friendSocket = connections.get(friendId);
           if (friendSocket && friendId != userId) {
-            friendSocket.send(`[${userId}] says: ${message}`);
+            friendSocket.send(JSON.stringify([userId, message]));
           }
         }
       }

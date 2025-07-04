@@ -1,0 +1,280 @@
+<div class="container">
+    <div class="content">
+
+        <header class="header">
+
+            <div style="flex-direction: row; display: flex; justify-content: space-between; padding: 1rem;">
+
+                <label style="font-size: 25px; font-weight: bold;"> My Task</label>
+
+                <button>Add new task</button>
+
+
+            </div>
+
+            <div style="flex-direction: row; display: flex; justify-content: space-between; padding: 1rem;">
+
+                <div class="tab">
+                    <div *ngFor="let item of tab; let i = index">{{item}}</div>
+                </div>
+            </div>
+
+        </header>
+
+        <main class="list">
+
+
+            <div class="box-container" *ngFor="let item of tasks; let i = index; trackBy: trackByIndex">
+
+                <div class="img-box">
+                    <svg viewBox="-1 0 24 24" width="70%" height="70%" style="fill: white;">
+                        <path [attr.d]="getimg('books')"></path>
+                    </svg>
+                </div>
+
+                <div class="box" (click)="showTask(item)">
+
+                    <div
+                        style="background-color: #27ca66; justify-content: center; display: flex; margin-top: 35px; font-size: 20px;">
+                        {{ item.get('title')![0]}}
+
+                    </div>
+
+                    <div style="background-color: #27ca66; justify-content: center; display: flex; font-size: 15px;">
+                        {{ item.get('Description')![0]}}
+                    </div>
+
+                    <div class="type-box">
+                        <div *ngFor="let item of ['coding', 'homework']"
+                            style=" background-color: #edbb5e; padding: 2px; border-radius: 10px; color: #fff;"> {{
+                            item}}
+                        </div>
+
+                        <div
+                            style="width: 100%; height: 100%; background-color: #90b9ff; justify-content: center; align-items: center; display: flex;">
+                            <div *ngFor="let img of getArrayData(item,'member')"
+                                style="width: 25px; height: 100%; justify-content: center; display: flex; align-items: center; border-radius: 50%;">
+
+                                <img [src]="img" style="width: 100%; height: 100%;">
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="progress">
+                        <canvas baseChart [data]="assigncharts( item.get('tasks')!)" [type]="'doughnut'"
+                            [options]="doughnutChartOptions">
+                        </canvas>
+
+                        <label>{{getPercent(item.get('tasks')!)}}%</label>
+
+                    </div>
+
+                    <div class="deadline-box">
+
+                        <div style="width: 20px; height: 100%; align-items: center; display: flex;">
+                            <svg viewBox="0 0 24 24" width="100%" height="100%" style="fill: white;">
+                                <path [attr.d]="getimg('clock')"></path>
+                            </svg>
+
+                        </div>
+
+                        {{getDeadline(item.get('deadline')![0], item.get('deadline')![1])}} Day lefts
+                    </div>
+
+
+                </div>
+
+            </div>
+
+
+        </main>
+
+    </div>
+
+    <aside class="right-side" [class.expand]="test">
+
+        <button (click)="c()">test expand</button>
+        <div *ngIf="isshowtask">
+            <label for="">title: {{showtask.get('title')}}</label>
+
+        </div>
+
+    </aside>
+
+
+
+
+
+
+</div>
+
+<style>
+    .container {
+        width: 84vw;
+        height: 100vh;
+        /* padding: 1rem; */
+        flex-direction: row;
+        display: flex;
+        background-color: aliceblue;
+        /* justify-content: center; */
+
+        & .content {
+            width: 100%;
+            height: 95.5%;
+
+            margin-top: 1rem;
+            margin-left: 1rem;
+            margin-bottom: 1rem;
+
+            flex-direction: column;
+            background-color: aqua;
+
+            & .header {
+                width: 100%;
+                height: 17%;
+                background-color: rgb(148, 148, 196);
+                flex-direction: column;
+                display: flex;
+            }
+
+            & .list {
+                width: 100%;
+                height: 82%;
+                background-color: rgb(217, 217, 255);
+                flex-wrap: wrap;
+                /* ✅ ให้ล้นแล้วขึ้นบรรทัดใหม่ */
+                flex-direction: row;
+                display: flex;
+                overflow-y: auto;
+
+
+                padding-top: 10px;
+            }
+        }
+
+        & .right-side {
+            width: 40%;
+            height: 95.5%;
+            background-color: rgb(235, 173, 152);
+            margin-top: 1rem;
+            margin-right: 1rem;
+            margin-bottom: 1rem;
+
+            /* z-index: 10; */
+        }
+
+
+        & .right-side.expand {
+            width: 10%;
+            /* right: 10px; */
+        }
+
+    }
+
+    .tab {
+        width: 25vw;
+        background-color: antiquewhite;
+        height: 30px;
+        flex-direction: row;
+        justify-content: space-between;
+        display: flex;
+        align-items: center;
+        padding-left: 10px;
+        padding-right: 10px
+    }
+
+    .box-container {
+        background-color: #ff9898;
+        width: 17vw;
+        height: 35vh;
+        flex-direction: column;
+        align-items: center;
+        display: flex;
+        position: relative;
+        /* margin-left: 29px; */
+        margin: 10px;
+
+
+        & .box {
+            background-color: #ffffff;
+            width: 17vw;
+            height: 30vh;
+            border-radius: 10%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            margin-top: 20px;
+            cursor: pointer;
+
+            flex-direction: column;
+            display: flex;
+            position: relative;
+
+            & .type-box {
+                font-size: 15px;
+                /* justify-content: space-between; */
+                margin: 10px;
+                border-radius: 10px;
+                flex-direction: row;
+                display: flex;
+                gap: 10px;
+            }
+
+            & .deadline-box {
+                font-size: 15px;
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                margin: 10px;
+                border-radius: 10px;
+                flex-direction: row;
+                display: flex;
+                gap: 10px;
+                background-color: #ff0000;
+                color: #fff;
+                padding: 2px;
+            }
+
+            & .progress {
+                background-color: #90b9ff;
+                font-size: 15px;
+                position: absolute;
+                bottom: 0;
+                right: 0;
+                margin: 10px;
+                color: white;
+
+                width: 100px;
+                height: 50px;
+
+                flex-direction: row;
+                display: flex;
+            }
+
+
+        }
+
+        & .img-box {
+            width: 40px;
+            height: 40px;
+            border-radius: 15%;
+            cursor: pointer;
+            background-color: #27ca66;
+            align-items: center;
+            justify-content: center;
+            display: flex;
+            position: absolute;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+
+
+        }
+
+    }
+
+    ::-webkit-scrollbar {
+        width: 0;
+    }
+</style>

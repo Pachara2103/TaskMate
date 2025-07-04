@@ -78,9 +78,14 @@
 
                 </div>
 
-                <div class="mid" *ngIf="Servercallback.trim()">
-                    {{Servercallback.trim()}}
-                </div>>
+                <div class="mid">
+
+                    <div *ngFor="let chat of chatList"
+                        [ngClass]="{'chat-right': chat.fromSelf, 'chat-left': !chat.fromSelf}">
+                        <span>{{chat.userId}}: {{ chat.message }}</span>
+                    </div>
+
+                </div>
 
                 <div class="bottom">
                     <input type="text" placeholder="Type a message" [(ngModel)]="chatMessage"
@@ -201,6 +206,36 @@
             width: 100%;
             height: 50%;
             background-color: rgb(255, 212, 155);
+
+            & .mid{
+                flex-direction: column-reverse;
+                display: flex;
+                justify-content: flex-start;
+                background-color: #91fdff;
+                width: 100%;
+                height: 50%;
+                overflow-y: auto;    
+            }
+
+            & .chat-left {
+                text-align: left;
+                background-color: #eee;
+                margin: 5px;
+                padding: 10px;
+                border-radius: 10px;
+                max-width: 60%;
+            }
+
+            & .chat-right {
+                text-align: right;
+                background-color: #a0e7e5;
+                margin: 5px;
+                padding: 10px;
+                border-radius: 10px;
+                margin-left: auto;
+                max-width: 60%;
+            }
+
 
             & .bottom {
                 position: absolute;
