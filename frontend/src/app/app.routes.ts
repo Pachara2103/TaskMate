@@ -4,6 +4,7 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { AddTaskComponent } from './add-task/add-task.component';
 import { MytaskComponent } from './mytask/mytask.component';
 import { TeamtaskComponent } from './teamtask/teamtask.component';
+import { ChatComponent } from './chat/chat.component';
 
 export const routes: Routes = [
     {
@@ -31,7 +32,8 @@ export const routes: Routes = [
         path: 'TeamTask',
         component: TeamtaskComponent,
         title: 'teamtask'
-    },
+    }
+
 
 
 ];

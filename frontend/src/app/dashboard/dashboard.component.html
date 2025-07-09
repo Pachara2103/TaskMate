@@ -1,267 +1,174 @@
-<div style="flex-direction: row; display: flex;">
+<div class="container">
+    <div class="content">
+        <header class="header">
 
-    <main>
-        <div class="container">
+            <div style="flex-direction: row; display: flex; justify-content: space-between; padding: 1rem;">
 
-            <section>
-                <div class="topbar">
-                    <label> {{dateString}}</label>
-
-                    <button routerLink="/Add">
-                        Add
-                    </button>
-
-                    <label> friend logo</label>
-
-                </div>
-
-            </section>
-
-            <section style="justify-content: center; display: flex; flex-direction: row;">
-                <div class="header">
-
-                    <div class="box">
-                        <div class="title">
-                            <label style="font-size: 40px;"> TaskMate</label>
-                            <label>Check your diary task and Let's finish it all today's task !</label>
-                        </div>
-
-                        <div class="bar">
-                            <div *ngFor="let bar of barList" [ngClass]="barFocus === bar ?'bar-focus':'bar-normal'"
-                                (click)="changeFocus(bar)">
-                                {{bar}}
-
-                            </div>
-
-
-                        </div>
-                    </div>
-
-                    <img src="images/team-task.png" style="width: 30%; height: 100%; margin-right: 20px;">
-
-
-                </div>
-
-
-
-
-            </section>
-
-            <section>
-                <app-list *ngIf="barFocus==='List'" [myTask]="myTask">
-                </app-list>
-
-            </section>
-
-        </div>
-
-    </main>
-
-    <aside>
-        <div class="right-box">
-
-            <header>
-                <label> your recent task</label>
-                <div *ngIf="recentTask" style="flex-direction: row; display: flex; gap: 10px; justify-content: center;">
-                    <div class="recenttask" *ngFor="let task of recentTask; let k = index">
-                        <!-- <label style="margin: 1rem;"> {{task}}</label> -->
-                        <div style="margin-right: 20px; "> {{task}}</div>
-
-                    </div>
-
-                </div>
-
-            </header>
-
-            <div class="chat-container">
-                <div class="top">
-
-                </div>
-
-                <div class="mid">
-
-                    <div *ngFor="let chat of chatList"
-                        [ngClass]="{'chat-right': chat.fromSelf, 'chat-left': !chat.fromSelf}">
-                        <span>{{chat.userId}}: {{ chat.message }}</span>
-                    </div>
-
-                </div>
-
-                <div class="bottom">
-                    <input type="text" placeholder="Type a message" [(ngModel)]="chatMessage"
-                        (keyup.enter)="sendMessage()">
-                </div>
+                <label style="font-size: 25px; font-weight: bold;"> Dashboard</label>
 
             </div>
 
+            <div style="flex-direction: row; display: flex; justify-content: space-between; padding: 1rem;">
+
+                <div class="tab">
+                    <div *ngFor="let item of tabList; let i = index">{{item}}</div>
+                </div>
+            </div>
+
+        </header>
+
+    </div>
+    <app-chat></app-chat>
 
 
-
-        </div>
-
-
-    </aside>
 </div>
 
 <style>
     .container {
-        width: 62vw;
+        width: 84vw;
         height: 100vh;
-        margin: 0.5rem;
+        /* padding: 1rem; */
+        flex-direction: row;
+        display: flex;
+        background-color: aliceblue;
+        /* justify-content: center; */
 
-        & .topbar {
+        & .content {
             width: 100%;
-            height: 8vh;
-            justify-content: space-between;
-            display: flex;
-            /* padding:2rem; */
-            /* background-color: #333; */
-            border-bottom: solid 1px #333;
+            height: 95.5%;
+
+            margin-top: 1rem;
+            margin-left: 1rem;
+            margin-bottom: 1rem;
+
+            flex-direction: column;
+            background-color: aqua;
+
+            & .header {
+                width: 100%;
+                height: 17%;
+                background-color: rgb(148, 148, 196);
+                flex-direction: column;
+                display: flex;
+            }
+
+            & .list {
+                width: 100%;
+                height: 82%;
+                background-color: rgb(217, 217, 255);
+                flex-wrap: wrap;
+                /* ✅ ให้ล้นแล้วขึ้นบรรทัดใหม่ */
+                flex-direction: row;
+                display: flex;
+                overflow-y: auto;
+
+
+                padding-top: 10px;
+            }
         }
+    }
 
-        & .header {
-            width: 100%;
-            height: 22vh;
-            border-radius: 20px;
-            /* border: solid 2px black; */
-            background-color: #ffebd6;
-            justify-content: space-between;
+    .tab {
+        width: 25vw;
+        background-color: antiquewhite;
+        height: 30px;
+        flex-direction: row;
+        justify-content: space-between;
+        display: flex;
+        align-items: center;
+        padding-left: 10px;
+        padding-right: 10px
+    }
+
+    .box-container {
+        background-color: #ff9898;
+        width: 17vw;
+        height: 35vh;
+        flex-direction: column;
+        align-items: center;
+        display: flex;
+        position: relative;
+        /* margin-left: 29px; */
+        margin: 10px;
+
+
+        & .box {
+            background-color: #ffffff;
+            width: 17vw;
+            height: 30vh;
+            border-radius: 10%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            margin-top: 20px;
+            cursor: pointer;
+
+            flex-direction: column;
             display: flex;
+            position: relative;
 
-            & .title {
-                width: auto;
-                height: 50%;
-                background-color: #ffbbbb;
-                justify-content: flex-start;
-                display: flex;
-                flex-direction: column;
-
-            }
-
-            & .box {
-                width: 70%;
-                justify-content: space-between;
-                margin: 0.5rem;
-                flex-direction: column;
-                display: flex;
-                background-color: rgb(218, 196, 168);
-            }
-
-            & .bar {
-                width: 70%;
-                height: 30%;
+            & .type-box {
+                font-size: 15px;
+                /* justify-content: space-between; */
+                margin: 10px;
                 border-radius: 10px;
-                background-color: #fff;
-                justify-content: space-between;
+                flex-direction: row;
                 display: flex;
-
-
-                /* margin: 10px; */
-                & .bar-focus {
-                    color: #fff;
-                    background-color: #66b8e5;
-                    cursor: pointer;
-                    width: auto;
-                    height: 100%;
-                    border-radius: 10px;
-                    align-items: center;
-                    display: flex;
-                    padding-left: 20px;
-                    padding-right: 20px;
-                    transition: background-color 0.3s ease;
-                    transition: transform 0.3s ease;
-                    transform: scale(1.05);
-                    /* 👈 เพิ่มตรงนี้ */
-
-                }
-
-                & .bar-normal {
-                    cursor: pointer;
-                    width: auto;
-                    height: 100%;
-                    border-radius: 20px;
-                    align-items: center;
-                    display: flex;
-                    padding-left: 20px;
-                    padding-right: 20px;
-
-                }
+                gap: 10px;
             }
+
+            & .deadline-box {
+                font-size: 15px;
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                margin: 10px;
+                border-radius: 10px;
+                flex-direction: row;
+                display: flex;
+                gap: 10px;
+                background-color: #ff0000;
+                color: #fff;
+                padding: 2px;
+            }
+
+            & .progress {
+                background-color: #90b9ff;
+                font-size: 15px;
+                position: absolute;
+                bottom: 0;
+                right: 0;
+                margin: 10px;
+                color: white;
+
+                width: 100px;
+                height: 50px;
+
+                flex-direction: row;
+                display: flex;
+            }
+
+
         }
 
+        & .img-box {
+            width: 40px;
+            height: 40px;
+            border-radius: 15%;
+            cursor: pointer;
+            background-color: #27ca66;
+            align-items: center;
+            justify-content: center;
+            display: flex;
+            position: absolute;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+
+
+        }
 
     }
 
-    .right-box {
-        position: relative;
-        width: 22vw;
-        height: 100vh;
-        flex-direction: column;
-        display: flex;
-        border-left: solid 2px #7e7e7e;
-
-        & .chat-container {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 50%;
-            background-color: rgb(255, 212, 155);
-
-            & .mid{
-                flex-direction: column-reverse;
-                display: flex;
-                justify-content: flex-start;
-                background-color: #91fdff;
-                width: 100%;
-                height: 50%;
-                overflow-y: auto;    
-            }
-
-            & .chat-left {
-                text-align: left;
-                background-color: #eee;
-                margin: 5px;
-                padding: 10px;
-                border-radius: 10px;
-                max-width: 60%;
-            }
-
-            & .chat-right {
-                text-align: right;
-                background-color: #a0e7e5;
-                margin: 5px;
-                padding: 10px;
-                border-radius: 10px;
-                margin-left: auto;
-                max-width: 60%;
-            }
-
-
-            & .bottom {
-                position: absolute;
-                bottom: 0;
-                width: 100%;
-                height: 14%;
-            }
-
-            & .bottom input {
-                width: 100%;
-                height: 100%;
-                /* background-color: aqua; */
-            }
-        }
-
-        & .recenttask {
-            width: 40%;
-            height: 100px;
-            padding: 1rem;
-            border-radius: 10px;
-            border: solid 1px #333;
-
-            color: #fff;
-            background-color: #ff0000;
-
-
-        }
+    ::-webkit-scrollbar {
+        width: 0;
     }
 </style>

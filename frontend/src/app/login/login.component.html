@@ -92,26 +92,26 @@
         <div class="box">
 
             <div class="input-box">
-                <label> Email</label>
-                <input type="text" placeholder="example@gmail.com">
+                <label> Username</label>
+                <input type="text" placeholder="example@gmail.com" [(ngModel)]="username">
             </div>
 
             <div class="input-box">
                 <label> Password</label>
-                <input type="password">
+                <input type="password" [(ngModel)]="password" (keyup.enter) ="sendLogin(username, password)" >
             </div>
 
             <div *ngIf="signup" class="input-box">
                 <label> Confirm Password</label>
-                <input type="password">
+                <input type="password" >
             </div>
 
-            <button class="button">{{signup?"Sign up":"Sign in"}}</button>
+            <button class="button" (click)="sendLogin(username, password)">{{signup?"Sign up":"Sign in"}}</button>
             <button class="google">{{signup? "Sign up with Google":"Sign in with Google"}}</button>
 
             <div style="flex-direction: row; display: flex; justify-content: center; margin: 10px;">
                 <label style="color: #a1a1a1;">{{signup? "Already have a account ?":"Don't have a account ?"}} </label>
-                <label (click)='showAlert()'
+                <label (click)="changeSign()"
                     style="text-decoration:underline; margin-left: 10px; color: #036cff; cursor: pointer;">
                     {{signup? "Sign in":"Sign up"}}</label>
             </div>

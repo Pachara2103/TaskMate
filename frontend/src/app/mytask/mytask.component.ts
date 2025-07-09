@@ -22,13 +22,13 @@ export class MytaskComponent {
     const list = this.testt.split(',');
     const sub = list[1].split('/');
 
-    console.log('testt split= ',this.testt.split(','), 'sub split= ', sub);
+    // console.log('testt split= ',this.testt.split(','), 'sub split= ', sub);
   }
 
   testt ='test,sub1/sub2,test2,sub1';
   test = false;
   c() {
-    console.log('click to xcpand')
+    // console.log('click to xcpand')
     this.test = !this.test;
   }
 
@@ -73,7 +73,7 @@ export class MytaskComponent {
   ];
 
   getArrayData(task: Map<string, Array<string>>, key:string){
-    console.log('array data= ',  task.get(key));
+    // console.log('array data= ',  task.get(key));
     return  task.get(key);
   }
 
@@ -84,7 +84,7 @@ export class MytaskComponent {
     const diffTime = end.getTime() - start.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    console.log(`เหลืออีก ${diffDays} วัน`);
+    // console.log(`เหลืออีก ${diffDays} วัน`);
     return Math.max(0, diffDays);
   }
 

@@ -1,33 +1,28 @@
-import { NgFor, NgIf } from '@angular/common';
-import { Component } from '@angular/core';
+import { NgClass, NgFor, NgIf, NgStyle } from '@angular/common';
+import { Component} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ChartOptions, ChartType, ChartData } from 'chart.js';
 import { provideCharts, BaseChartDirective } from 'ng2-charts';
+import { ChatComponent } from '../chat/chat.component';
 
 
 @Component({
   selector: 'app-teamtask',
-   imports: [NgFor, NgIf, BaseChartDirective, FormsModule],
+  imports: [NgFor, NgIf, NgClass, NgStyle, BaseChartDirective, FormsModule, ChatComponent],
   standalone: true,
   providers: [provideCharts()],
   templateUrl: './teamtask.component.html',
   styleUrl: './teamtask.component.css'
 })
 export class TeamtaskComponent {
-
-
-  testlist = [1, 2, 3, 4, 5]
-
-  tab = ['All', 'Started', 'Completed', 'test']
-
-  ngOnInit(){
+  ngOnInit() {
     const list = this.testt.split(',');
     const sub = list[1].split('/');
-
-    console.log('testt split= ',this.testt.split(','), 'sub split= ', sub);
   }
 
-  testt ='test,sub1/sub2,test2,sub1';
+  testlist = [1, 2, 3, 4, 5]
+  tab = ['All', 'Started', 'Completed', 'test']
+  testt = 'test,sub1/sub2,test2,sub1';
   test = false;
   c() {
     console.log('click to xcpand')
@@ -51,7 +46,6 @@ export class TeamtaskComponent {
     return index;
   }
 
-
   showtask = new Map<string, string>();
   isshowtask = false;
 
@@ -69,14 +63,14 @@ export class TeamtaskComponent {
       ['tasks', ['1', '2', '1']],
       ['deadline', [`${new Date()}`, `${new Date('2025-07-06')}`]],
       ['member', ['images/user.png']],
-      ['tasks',['']]
+      ['tasks', ['']]
     ])
 
   ];
 
-  getArrayData(task: Map<string, Array<string>>, key:string){
-    console.log('array data= ',  task.get(key));
-    return  task.get(key);
+  getArrayData(task: Map<string, Array<string>>, key: string) {
+    // console.log('array data= ', task.get(key));
+    return task.get(key);
   }
 
   getDeadline(s: string, e: string) {
@@ -86,9 +80,10 @@ export class TeamtaskComponent {
     const diffTime = end.getTime() - start.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    console.log(`เหลืออีก ${diffDays} วัน`);
+    // console.log(`เหลืออีก ${diffDays} วัน`);
     return Math.max(0, diffDays);
   }
+
 
 
 

@@ -13,7 +13,7 @@ export class ListComponent {
   @Input() myTask: string[] = [];
 
   ngOnInit() {
-    console.log('mytask= ', this.myTask)
+    // console.log('mytask= ', this.myTask)
   }
 
   checkEmpty(value?: string[]) {  // ? หมายถึง optional parameter → ไม่ส่งมาก็ไม่ error
