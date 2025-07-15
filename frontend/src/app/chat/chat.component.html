@@ -1,25 +1,74 @@
-<aside class="right-side">
+<aside class="right-side" #chat>
 
-    <!-- <button (click)="c()">test expand</button> -->
-    <!-- <div *ngIf="isshowtask">
-        <label for="">title: {{showtask.get('title')}}</label>
+    <!-- <button></button>  [ngStyle]="{ 'background-color': tabFocus === tab ? '#d5d5d5' : '#ffffff'}" -->
+    <section id="bar">
+        <div class="chat-bar">
 
-    </div> -->
+            <div (click)="toggleexpand()" style=" margin-bottom: 20px; cursor: pointer;">
+                <div style="height: 40px;">
+                    <svg viewBox="-1 0 24 24" width="100%" height="100%" style="fill: white;">
+                        <path [attr.d]="getarrow()"></path>
+                    </svg>
+                </div>
 
-    <div
-        style="flex-direction: column;; display: flex; background-color: #90b9ff; width: 50px; height: 100%; position: absolute;top:0;">
-        <div *ngFor="let tab of tabTask; let i = index; trackBy: trackByIndex"
-            [ngStyle]="{ 'background-color': tabFocus === tab ? '#d5d5d5' : '#ffffff', 'border-right' : tabFocus === tab ? 'solid red' : '', 'box-sizing': 'border-box' }"
-            (click)="changeTab(tab)"
-            style=" width: 100%; height: 50px; background-color: #d5d5d5; cursor: pointer; justify-content: center; align-items: center; display: flex;">
-            <svg viewBox="0 0 24 24" width="70%" height="70%">
-                <path [attr.d]="tabImg[i]"></path>
-            </svg>
+            </div>
 
+            <div *ngFor="let tab of tabTask; let i = index; trackBy: trackByIndex" (click)="changeTab(tab)"
+                style=" width: 100%; height: 50px; cursor: pointer; justify-content: center; align-items: center; display: flex;">
+                <svg viewBox="0 0 24 24" width="70%" height="70%"
+                    [ngStyle]="{ 'fill': tabFocus === tab ? '#fff' : '#839ca0'}">
+                    <path [attr.d]="getimg(tab)"></path>
+                </svg>
+
+            </div>
         </div>
-    </div>
 
-    <div *ngIf="this.tabFocus==='searchfriend'"
+    </section>
+
+    <main id="content" style="flex-direction: column; display: flex ; width: 100%;">
+
+        <section id="icon= chat_room">
+
+            <div
+                style="justify-content: center; align-items: center; display: flex; background-color: #91fdff; font-size: 20px; font-weight: bold; padding: 10px;">
+                Chat
+            </div>
+
+            <div style="flex-direction: row; display: flex; gap: 5px;">
+                <div *ngFor="let i of chatlist" 
+                [ngStyle]="{'color': chatfocus===i ? 'black': '#fff', 'border-bottom':chatfocus===i? 'solid 2px #ed694c': '','padding':'5px', 'background': chatfocus===i? '#d6e4e5':''}"
+                (click)="chchatfocus(i)">
+                    {{i}}
+                </div>
+            </div>
+
+            <div *ngIf="this.tabFocus==='chat_room' ">
+
+                <div
+                    style="flex-direction: column; display: flex; width: 100%; height: 100%; background-color: #edbb5e; margin-top: 20px; gap: 5px;">
+                    <div *ngFor="let friend of allfriends; let i = index ; trackBy:trackByIndex"
+                        (click)="changeChat(friend, 'friend')"
+                        style="background-color: #fff; width: 100%; height: 50px; flex-direction: row; display: flex; align-items: center; display: flex; position: relative; gap: 15px; cursor: pointer;">
+                        <div style=" background-color: #27ca66; width: 45px; height: 45px; border-radius: 50%">
+
+                        </div>
+
+
+                        <div> {{ friend.friend_name }} </div>
+
+                        <div style=" width: 45px; height: 45px; position: absolute; right: 20px;">
+                            <img src="images/icons/message.png" style="width: 100%; height: 100%;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+
+
+    <!-- <div *ngIf="this.tabFocus==='searchfriend'"
         style="  width: 100%; height: 50%; padding-left: 50px; box-sizing: border-box; flex-direction: column; display: flex;">
         <div
             style="flex-direction: row; display: flex;  background-color: #90b9ff; position: relative; width: 100%; height: 40px;">
@@ -90,37 +139,15 @@
             </div>
         </div>
     </div>
-
-    <div *ngIf="this.tabFocus==='chat_room'"
-        style="  width: 100%; height: 50%; padding-left: 50px; box-sizing: border-box; flex-direction: column; display: flex;">
-
-        <div style="justify-content: center; align-items: center; display: flex;">
-            friend
-        </div>
-
-        <div
-            style="flex-direction: column; display: flex; width: 100%; height: 100%; background-color: #edbb5e; margin-top: 20px; gap: 5px;">
-            <div *ngFor="let friend of allfriends; let i = index ; trackBy:trackByIndex" (click)="changeChat(friend)"
-                style="background-color: #fff; width: 100%; height: 50px; flex-direction: row; display: flex; align-items: center; display: flex; position: relative; gap: 15px; cursor: pointer;">
-                <div style=" background-color: #27ca66; width: 45px; height: 45px; border-radius: 50%">
-
-                </div>
-
-
-                <div> {{ friend.friend_name }} </div>
-
-                <div style=" width: 45px; height: 45px; position: absolute; right: 20px;">
-                    <img src="images/icons/message.png" style="width: 100%; height: 100%;">
-                </div>
-            </div>
-        </div>
-    </div>
+-->
 
 
 
 
 
-    <div class="chat-container">
+
+
+    <!-- <div class="chat-container">
         <div class="top">
             {{this.chat_now.friend_name}}
 
@@ -173,101 +200,124 @@
             <input type="text" placeholder="Type a message" [(ngModel)]="chatMessage" (keyup.enter)="sendMessage()">
         </div>
 
-    </div>
+    </div> -->
 
+   
 </aside>
 
 <style>
     .right-side {
-        width: 22vw;
-        height: 95.5%;
-        background-color: rgb(235, 173, 152);
+        /* width: 4vw; */
+        width: 25vw;
+        height: 96vh;
         margin-top: 1rem;
         margin-right: 1rem;
         margin-bottom: 1rem;
         position: relative;
+        flex-direction: row;
+        display: flex;
+        transition: width 0.3s ease;
+        overflow: hidden;
+    }
+
+    .right-side.expand {
+        /* width: 25vw; */
+        /* background-color: #eff5f5; */
+        background-color: #d1f0f0;
+        border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
+
+    }
+
+    .chat-bar {
+        /* position: absolute;
+        top: 0; */
         flex-direction: column;
         display: flex;
+        background-color: #497173;
+        width: 4vw;
+        height: 100%;
 
-        & .chat-container {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 50%;
-            background-color: rgb(146, 255, 170);
-
-            & .mid {
-                flex-direction: column;
-                display: flex;
-                justify-content: flex-start;
-                background-color: #91fdff;
-                width: 100%;
-                height: 72%;
-                overflow-y: auto;
-
-                & .chat-right {
-                    position: relative;
-                    background-color: #a0e7e5;
-                    margin: 5px;
-                    padding: 10px;
-                    max-width: 60%;
-                    margin-left: auto;
-
-                    border-radius: 20px 0px 20px 20px;
-                    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
-                    word-wrap: break-word;
-                    word-break: break-word;
-                    text-align: left;
-
-                }
-            }
-
-            & .chat-left {
-                position: relative;
-                background-color: #eee;
-                margin: 5px;
-                padding: 10px;
-                max-width: 80%;
-                margin-right: auto;
-
-                border-radius: 0px 20px 20px 20px;
-                box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
-                word-wrap: break-word;
-                word-break: break-word;
-                text-align: right;
-                flex-direction: row;
-                display: flex;
-            }
-
-
-
-            & .top {
-                width: 100%;
-                height: 14%;
-                background-color: #f8a8ff;
-                justify-content: center;
-                align-items: center;
-                display: flex;
-            }
-
-
-            & .bottom {
-                position: absolute;
-                bottom: 0;
-                width: 100%;
-                height: 14%;
-            }
-
-            & .bottom input {
-                width: 100%;
-                height: 100%;
-            }
-        }
+        padding: 5px;
+        box-sizing: border-box;
+        gap: 2px;
+        border-radius: 10px;
 
     }
 
 
-    /* .right-side.expand {
-            width: 10%;
-        } */
+    .chat-container {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 50%;
+        background-color: rgb(146, 255, 170);
+
+        & .mid {
+            flex-direction: column;
+            display: flex;
+            justify-content: flex-start;
+            background-color: #91fdff;
+            width: 100%;
+            height: 72%;
+            overflow-y: auto;
+
+            & .chat-right {
+                position: relative;
+                background-color: #a0e7e5;
+                margin: 5px;
+                padding: 10px;
+                max-width: 60%;
+                margin-left: auto;
+
+                border-radius: 20px 0px 20px 20px;
+                box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
+                word-wrap: break-word;
+                word-break: break-word;
+                text-align: left;
+
+            }
+        }
+
+        & .chat-left {
+            position: relative;
+            background-color: #eee;
+            margin: 5px;
+            padding: 10px;
+            max-width: 80%;
+            margin-right: auto;
+
+            border-radius: 0px 20px 20px 20px;
+            box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
+            word-wrap: break-word;
+            word-break: break-word;
+            text-align: right;
+            flex-direction: row;
+            display: flex;
+        }
+
+
+
+        & .top {
+            width: 100%;
+            height: 14%;
+            background-color: #f8a8ff;
+            justify-content: center;
+            align-items: center;
+            display: flex;
+        }
+
+
+        & .bottom {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 14%;
+        }
+
+        & .bottom input {
+            width: 100%;
+            height: 100%;
+        }
+    }
 </style>

@@ -44,7 +44,102 @@
     </div>
   </nav>
 
-  <!-- <button routerLink="/Chat">to chat</button> -->
+  <div #msg *ngIf="getChat().notnull" cdkDrag class="msg">
+
+    <section id="header">
+      <div style="flex-direction: row; display: flex; justify-content: flex-start;align-items: center; gap: 10px;">
+
+        <div style="width: 40px; height: 40px; cursor: pointer;" (click)="toggleexpand()">
+          <svg viewBox="0 0 24 24" width="100%" height="100%" style="fill: #1371b9;">
+            <path [attr.d]="getimg('msg')"></path>
+          </svg>
+        </div>
+
+        <div style="background-color: #d0995b;">{{getChatName()}}</div>
+
+        <button (click)="test()">test</button>
+      </div>
+
+    </section>
+
+    <section id="chat message" *ngIf="!ismsg">
+      <div #chatmsg
+        style="width: 100%; height: 39vh; background-color: #fff; flex-direction: column; display: flex;overflow-y: auto;">
+
+        <div *ngIf="getChat().type==='friend' ">
+
+          <div *ngFor="let chat of friendchatList">
+
+            <div *ngIf="isyourself(chat.sender_id)"
+              style="flex-direction: row; display: flex; align-items: center; margin-right: 5px;">
+
+              <div class="chat-right">
+                {{ chat.chatmessage }}
+                <!-- <div style=" font-size: 12px; position: absolute; bottom: 0; left: -33px;">
+                  {{chat.time}}
+                </div> -->
+
+              </div>
+
+            </div>
+
+            <div *ngIf="!isyourself(chat.sender_id)"
+              style="flex-direction: row; display: inline-flex; align-items: center; padding-left: 5px;">
+              <div
+                style="width: 38px; height: 38px; background-color: #27ca66; border-radius: 50%; margin-bottom: 10px;">
+
+              </div>
+
+              <div class="chat-left">
+                <div style="text-align: start; display: flex;">
+                  {{ chat.chatmessage }}
+
+                </div>
+                <!-- <div style=" font-size: 12px; position: absolute; bottom: 0; right: -30px;"> {{chat.time}} </div> -->
+
+              </div>
+
+            </div>
+
+
+
+          </div>
+
+
+        </div>
+
+
+
+      </div>
+
+
+    </section>
+
+    <section id="send message" *ngIf="!ismsg">
+      <div
+        style="flex-direction: row; display: flex;align-items: center; position: relative; background-color: #d06800;">
+        <input type="text" placeholder="type a message" [(ngModel)]="chatMessage"
+          (keyup.enter)="sendMessage(chatMessage)">
+
+        <div
+          style="width: 40px; height: 40px; cursor: pointer; position: absolute; right: 5px; justify-content: center; align-items: center; display: flex;"
+          (click)="toggleexpand()">
+          <svg viewBox="0 0 24 24" width="70%" height="70%" style="fill: #1371b9;">
+            <path [attr.d]="getimg('send')"></path>
+          </svg>
+        </div>
+
+      </div>
+
+    </section>
+
+
+
+
+
+
+  </div>
+
   <router-outlet></router-outlet>
 
 </main>
@@ -111,5 +206,68 @@
       width: 100%;
       height: 13%;
     }
+  }
+
+  .msg {
+    background: #90caf9;
+    border-radius: 8px;
+    padding: 10px;
+    position: absolute;
+    z-index: 100;
+    bottom: 0;
+    right: 0;
+
+    flex-direction: column;
+    justify-content: space-between;
+    display: flex;
+    width: 25vw;
+    height: 25vw;
+  }
+
+  .msg.expand {
+    width: 100px;
+    height: 50px;
+    padding: 10px;
+  }
+
+  .msg input {
+    width: 100%;
+    height: 4vh;
+    border-radius: 10px;
+    border: none;
+    padding: 10px;
+  }
+
+  .chat-right {
+    position: relative;
+    background-color: #a0e7e5;
+    margin: 5px;
+    padding: 10px;
+    max-width: 60%;
+    margin-left: auto;
+
+    border-radius: 20px 0px 20px 20px;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
+    word-wrap: break-word;
+    word-break: break-word;
+    text-align: left;
+
+  }
+
+  .chat-left {
+    position: relative;
+    background-color: #eee;
+    margin: 5px;
+    padding: 10px;
+    max-width: 80%;
+    margin-right: auto;
+
+    border-radius: 0px 20px 20px 20px;
+    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
+    word-wrap: break-word;
+    word-break: break-word;
+    text-align: right;
+    flex-direction: row;
+    display: flex;
   }
 </style>

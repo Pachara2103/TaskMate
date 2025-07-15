@@ -4,16 +4,11 @@
         <header class="header">
 
             <div style="flex-direction: row; display: flex; justify-content: space-between; padding: 1rem;">
-
                 <label style="font-size: 25px; font-weight: bold;"> Team Task</label>
-
                 <button>Add new task</button>
-
-
             </div>
 
             <div style="flex-direction: row; display: flex; justify-content: space-between; padding: 1rem;">
-
                 <div class="tab">
                     <div *ngFor="let item of tab; let i = index">{{item}}</div>
                 </div>
@@ -23,8 +18,8 @@
 
         <main class="list">
 
-
-            <div class="box-container" *ngFor="let item of tasks; let i = index; trackBy: trackByIndex">
+            <div *ngFor="let task of alltasks; let i = index; trackBy: trackByIndex" (click)="changeTask(task, i)"
+                [ngClass]="['box-container', boxIndex === i ? 'focus' : '']">
 
                 <div class="img-box">
                     <svg viewBox="-1 0 24 24" width="70%" height="70%" style="fill: white;">
@@ -32,25 +27,24 @@
                     </svg>
                 </div>
 
-                <div class="box" (click)="showTask(item)">
+                <div class="box">
 
                     <div
                         style="background-color: #27ca66; justify-content: center; display: flex; margin-top: 35px; font-size: 20px;">
-                        {{ item.get('title')![0]}}
+                        {{ task.title}}
 
                     </div>
 
                     <div style="background-color: #27ca66; justify-content: center; display: flex; font-size: 15px;">
-                        {{ item.get('Description')![0]}}
+                        {{ task.description}}
                     </div>
 
                     <div class="type-box">
-                        <div *ngFor="let item of ['coding', 'homework']"
-                            style=" background-color: #edbb5e; padding: 2px; border-radius: 10px; color: #fff;"> {{
-                            item}}
+                        <div style=" background-color: #edbb5e; padding: 2px; border-radius: 10px; color: #fff;">
+                            {{task.category}}
                         </div>
 
-                        <div
+                        <!-- <div
                             style="width: 100%; height: 100%; background-color: #90b9ff; justify-content: center; align-items: center; display: flex;">
                             <div *ngFor="let img of getArrayData(item,'member')"
                                 style="width: 25px; height: 100%; justify-content: center; display: flex; align-items: center; border-radius: 50%;">
@@ -59,29 +53,26 @@
 
                             </div>
 
-                        </div>
+                        </div> -->
 
                     </div>
 
                     <div class="progress">
-                        <canvas baseChart [data]="assigncharts( item.get('tasks')!)" [type]="'doughnut'"
+                        <canvas baseChart [data]="assigncharts( task.detail)" [type]="'doughnut'"
                             [options]="doughnutChartOptions">
                         </canvas>
 
-                        <label>{{getPercent(item.get('tasks')!)}}%</label>
-
+                        <label style="position: absolute; right: 15px; top:20px;">{{getPercent(task.detail)}}% </label>
                     </div>
 
                     <div class="deadline-box">
-
                         <div style="width: 20px; height: 100%; align-items: center; display: flex;">
                             <svg viewBox="0 0 24 24" width="100%" height="100%" style="fill: white;">
                                 <path [attr.d]="getimg('clock')"></path>
                             </svg>
 
                         </div>
-
-                        {{getDeadline(item.get('deadline')![0], item.get('deadline')![1])}} Day lefts
+                        {{getDeadline(task.start_time, task.end_time)}}
                     </div>
 
 
@@ -96,29 +87,263 @@
 
     <app-chat></app-chat>
 
-    
+    <div #showtask id="showtask">
+
+        <section id="backbottom">
+            <div (click)="closetask()"
+                style="width: 20px; height: 20px; align-items: center; display: flex; position: absolute; top:22px; left: 0;padding: 10px; ">
+                <svg viewBox="0 0 24 24" width="100%" height="100%" style="fill:#5f6064">
+                    <path [attr.d]="getimg('back')"></path>
+                </svg>
+            </div>
+        </section>
 
 
 
+        <div
+            style="justify-content: center; display: inline-flex; background-color: #edbb5e; font-size: 28px; font-weight: bold;">
+            {{showTask.title}}</div>
+
+
+        <section id="description">
+            <div class="row">
+                <div class="showtaskimg">
+                    <svg viewBox="0 0 24 24" width="100%" height="100%" style="fill:#5f6064">
+                        <path [attr.d]="getimg('doc')"></path>
+                    </svg>
+                </div>
+                <label style="font-size: 17px; color: #5f6064;">Description</label>
+
+            </div>
+
+            <div style="text-align: start; margin-bottom: 10px; padding-top: 10px;">{{showTask.description}}</div>
+            <div style="border-bottom: solid 1px #e6e5e8;"></div>
+        </section>
+
+        <section id="Assignee">
+            <div class="row">
+                <div class="showtaskimg">
+                    <svg viewBox="0 0 24 24" width="100%" height="100%" style="fill:#5f6064">
+                        <path [attr.d]="getimg('user')"></path>
+                    </svg>
+                </div>
+                <label style="font-size: 17px; color: #5f6064;">Assignee</label>
+
+            </div>
+
+        </section>
+
+        <section id="start-date">
+            <div class="row">
+                <div class="showtaskimg">
+                    <svg viewBox="0 0 24 24" width="100%" height="100%" style="fill:#5f6064">
+                        <path [attr.d]="getimg('calendar')"></path>
+                    </svg>
+                </div>
+                <label style="font-size: 17px; color: #5f6064; margin-top: 3px;">Start date</label>
+
+                <div style="margin-left: 22px;">{{getDate(showTask.start_time)}}</div>
+
+            </div>
+
+        </section>
+
+        <section id="end-date">
+            <div class="row">
+                <div class="showtaskimg">
+                    <svg viewBox="0 0 24 24" width="100%" height="100%" style="fill:#5f6064">
+                        <path [attr.d]="getimg('calendar')"></path>
+                    </svg>
+                </div>
+                <label style="font-size: 17px; color: #5f6064; margin-top: 3px;">End date</label>
+
+                <div style="margin-left: 30px;">{{getDate(showTask.end_time)}}</div>
+
+
+            </div>
+        </section>
+
+
+        <section id="Tags">
+            <div class="row">
+                <div class="showtaskimg">
+                    <svg viewBox="0 0 24 24" width="100%" height="100%" style="fill:#5f6064">
+                        <path [attr.d]="getimg('tag')"></path>
+                    </svg>
+                </div>
+                <label style="font-size: 17px; color: #5f6064;">Tags</label>
+
+                <div style="flex-direction: row; display: flex; padding-left: 4vw; gap: 5px;">
+                    <div *ngFor="let i of category">
+                        <div style="padding: 1px; padding-left: 5px; padding-right: 5px; border-radius: 5px;"
+                            [ngStyle]="{ 'background-color': tagColor.get(i)![0], color: tagColor.get(i)![1]}">
+                            {{ i }}
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="detail">
+            <div class="row">
+                <div class="showtaskimg">
+                    <svg viewBox="0 0 24 24" width="100%" height="100%" style="fill:#5f6064">
+                        <path [attr.d]="getimg('detail')"></path>
+                    </svg>
+                </div>
+                <label style="font-size: 17px; color: #5f6064;">Detail</label>
+
+            </div>
+
+        </section>
+
+        <div class="listtask">
+            <div *ngFor="let i of showTask.detail">
+                <div *ngFor="let main of i; let j = index;" style="border-radius: 10px; border:solid 1px #e6e5e8;">
+
+                    <div style="flex-direction: row;display: flex; gap: 5px; padding-left: 5px; padding-top: 5px;">
+                        <div (click)="togglemaincheck(main, showTask.task_id)"
+                            style="width: 20px; height: 20px; align-items: center; display: flex; cursor: pointer;">
+                            <svg viewBox="0 0 24 24" width="100%" height="100%"
+                                [ngStyle]="{fill:main.status==='completed' ? 'rgb(28, 202, 28)': '#5f6064'}">
+                                <path [attr.d]="getCheckIconByStatus(main.status)"></path>
+                            </svg>
+                        </div>
+
+                        {{main.tasks}}
+                    </div>
+
+                    <div
+                        style="margin-left: 20px; flex-direction: column; display: inline-flex; gap: 10px; padding-bottom: 10px; padding-top: 10px;">
+                        <div *ngFor="let sub of main.subtasks; let p = index; trackBy: trackByIndex" style="gap: 10px;">
+                            <div
+                                style="flex-direction: row;display: inline-flex; padding: 5px; background-color: #f8fafb; border:solid 1px #e6e5e8; border-radius: 5px; gap: 5px;">
+                                <div (click)="togglesubcheck(main,sub,showTask.task_id)"
+                                    style="width: 20px; height: 20px; align-items: center; display: flex; cursor: pointer;">
+                                    <svg viewBox="0 0 24 24" width="100%" height="100%"
+                                        [ngStyle]="{fill:sub.status==='completed' ? 'rgb(28, 202, 28)': '#5f6064'}">
+                                        <path [attr.d]="getCheckIconByStatus(sub.status)"></path>
+                                    </svg>
+                                </div>
+
+                                {{sub.subtask}}
+
+                            </div>
+                        </div>
+
+
+                    </div>
+
+
+                </div>
+            </div>
+
+        </div>
+
+        <section id="bottom">
+            <div
+                style="position: absolute; bottom: 10px; right: 10px; flex-direction: row; display: flex; align-items: center; gap: 5px;">
+                <div class="bottomimg">
+                    <svg viewBox="0 0 24 24" width="100%" height="100%">
+                        <path [attr.d]="getimg('edit')"></path>
+                    </svg>
+
+                </div>
+
+                <div class="bottomimg">
+                    <svg viewBox="0 0 24 24" width="100%" height="100%">
+                        <path [attr.d]="getimg('bin')"></path>
+                    </svg>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+    </div>
 
 
 
 </div>
 
+
 <style>
+    #showtask {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 0;
+        background-color: #ffffff;
+        transition: width 0.2s ease;
+        height: 96vh;
+        box-sizing: border-box;
+        flex-direction: column;
+        display: flex;
+        border-top-left-radius: 10px;
+        border-bottom-left-radius: 10px;
+        overflow: hidden;
+
+    }
+
+    #showtask.expand {
+        margin: 15px;
+        gap: 5px;
+        padding: 20px;
+        width: 25vw;
+    }
+
+    .listtask {
+        flex-direction: column;
+        display: flex;
+        max-height: 55vh;
+        gap: 10px;
+        overflow-y: auto;
+    }
+
+    .listtask::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    .listtask::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .listtask::-webkit-scrollbar-thumb {
+        background-color: #888;
+        border-radius: 10px;
+    }
+
+   
+    .row {
+        flex-direction: row;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        position: relative;
+    }
+
+    .showtaskimg {
+        width: 17px;
+        height: 17px;
+        align-items: center;
+        display: flex;
+    }
+
     .container {
         width: 84vw;
         height: 100vh;
-        /* padding: 1rem; */
         flex-direction: row;
         display: flex;
         background-color: aliceblue;
-        /* justify-content: center; */
+        position: relative;
 
         & .content {
             width: 100%;
             height: 95.5%;
-
             margin-top: 1rem;
             margin-left: 1rem;
             margin-bottom: 1rem;
@@ -143,103 +368,8 @@
                 flex-direction: row;
                 display: flex;
                 overflow-y: auto;
-
-
                 padding-top: 10px;
             }
-        }
-
-        & .right-side {
-            width: 40%;
-            height: 95.5%;
-            background-color: rgb(235, 173, 152);
-            margin-top: 1rem;
-            margin-right: 1rem;
-            margin-bottom: 1rem;
-            position: relative;
-            flex-direction: column;
-            display: flex;
-
-            & .chat-container {
-                position: absolute;
-                bottom: 0;
-                width: 100%;
-                height: 50%;
-                background-color: rgb(146, 255, 170);
-
-                & .mid {
-                    flex-direction: column;
-                    display: flex;
-                    justify-content: flex-start;
-                    background-color: #91fdff;
-                    width: 100%;
-                    height: 72%;
-                    overflow-y: auto;
-
-                    & .chat-right {
-                        position: relative;
-                        background-color: #a0e7e5;
-                        margin: 5px;
-                        padding: 10px;
-                        max-width: 60%;
-                        margin-left: auto;
-
-                        border-radius: 20px 0px 20px 20px;
-                        box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
-                        word-wrap: break-word;
-                        word-break: break-word;
-                        text-align: left;
-
-                    }
-                }
-
-                & .chat-left {
-                    position: relative;
-                    background-color: #eee;
-                    margin: 5px;
-                    padding: 10px;
-                    max-width: 80%;
-                    margin-right: auto;
-
-                    border-radius: 0px 20px 20px 20px;
-                    box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
-                    word-wrap: break-word;
-                    word-break: break-word;
-                    text-align: right;
-                    flex-direction: row;
-                    display: flex;
-                }
-
-
-
-                & .top {
-                    width: 100%;
-                    height: 14%;
-                    background-color: #f8a8ff;
-                    justify-content: center;
-                    align-items: center;
-                    display: flex;
-                }
-
-
-                & .bottom {
-                    position: absolute;
-                    bottom: 0;
-                    width: 100%;
-                    height: 14%;
-                }
-
-                & .bottom input {
-                    width: 100%;
-                    height: 100%;
-                }
-            }
-
-        }
-
-
-        & .right-side.expand {
-            width: 10%;
         }
 
     }
@@ -256,6 +386,10 @@
         padding-right: 10px
     }
 
+    .focus {
+        transform: scale(1.05);
+    }
+
     .box-container {
         background-color: #ff9898;
         width: 17vw;
@@ -264,7 +398,8 @@
         align-items: center;
         display: flex;
         position: relative;
-        /* margin-left: 29px; */
+        transition: transform 0.3s ease;
+
         margin: 10px;
 
 
@@ -308,18 +443,13 @@
 
             & .progress {
                 background-color: #90b9ff;
-                font-size: 15px;
                 position: absolute;
                 bottom: 0;
                 right: 0;
                 margin: 10px;
                 color: white;
-
-                width: 100px;
-                height: 50px;
-
-                flex-direction: row;
-                display: flex;
+                width: 60px;
+                height: 60px;
             }
 
 
@@ -342,6 +472,18 @@
 
         }
 
+    }
+
+    .bottomimg {
+        height: 20px;
+        align-items: center;
+        padding: 3px;
+    }
+
+    .bottomimg:hover {
+        background-color: #e6e5e8;
+        border-radius: 10px;
+        transform: scale(1.1);
     }
 
     ::-webkit-scrollbar {
