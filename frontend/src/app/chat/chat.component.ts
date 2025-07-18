@@ -19,17 +19,21 @@ export class ChatComponent {
     private router: Router,
 
   ) { }
-  // ws!: WebSocket;
-  alluser: Array<{ userid: number; username: string; status: string }> = [];
+  alluser: Array<{ userid: number; username: string; status: string, profile:string}> = [];
   allrequest: Array<{ from_user: number, from_username: string, status: string, to_user: number, to_username: string }> = [];
   allfriends: Array<{ friend_id: number, friend_name: string }> = [];
+
+  get allrooms() {
+    return this.userService.allrooms;
+  }
+
 
   imgsrc: Map<string, string> = new Map([
     ['left',
       "M 10.484985 4.9992371 A 1 1 0 0 0 9.7800293 5.2900085 L 5.190033 9.8800049 A 3 3 0 0 0 5.190033 14.119995 L 9.7800293 18.709991 A 1 1 0 0 0 10.480042 19.000031 A 1 1 0 0 0 11.190033 18.709991 A 1 1 0 0 0 11.190033 17.290009 L 6.6000366 12.709991 A 1 1 0 0 1 6.6000366 11.290009 L 11.190033 6.7099915 A 1 1 0 0 0 11.190033 5.2900085 A 1 1 0 0 0 10.484985 4.9992371 z M 17.485016 4.9992371 A 1 1 0 0 0 16.779968 5.2900085 L 10.779968 11.290009 A 1 1 0 0 0 10.779968 12.709991 L 16.779968 18.709991 A 1 1 0 0 0 17.47998 19.000031 A 1 1 0 0 0 18.189972 18.709991 A 1 1 0 0 0 18.189972 17.290009 L 12.899963 12 L 18.189972 6.7099915 A 1 1 0 0 0 18.189972 5.2900085 A 1 1 0 0 0 17.485016 4.9992371 z "
     ], ['right',
       "M 6.105011 4.9992371 A 1 1 0 0 0 5.3999634 5.2900085 A 1 1 0 0 0 5.3999634 6.7099915 L 10.689972 12 L 5.3999634 17.290009 A 1 1 0 0 0 6.0999756 19.000031 A 1 1 0 0 0 6.809967 18.709991 L 12.809967 12.709991 A 1 1 0 0 0 12.809967 11.290009 L 6.809967 5.2900085 A 1 1 0 0 0 6.105011 4.9992371 z M 13.105042 4.9992371 A 1 1 0 0 0 12.399994 5.2900085 A 1 1 0 0 0 12.399994 6.7099915 L 16.999969 11.290009 A 1 1 0 0 1 16.999969 12.709991 L 12.399994 17.290009 A 1 1 0 0 0 13.100006 19.000031 A 1 1 0 0 0 13.809998 18.709991 L 18.399994 14.119995 A 3 3 0 0 0 18.399994 9.8800049 L 13.809998 5.2900085 A 1 1 0 0 0 13.105042 4.9992371 z "
-    ], ['chat_room',
+    ], ['chatroom',
       "m13-.004H5C2.243-.004,0,2.239,0,4.996v12.854c0,.793.435,1.519,1.134,1.894.318.171.667.255,1.015.255.416,0,.831-.121,1.191-.36l3.963-2.643h5.697c2.757,0,5-2.243,5-5v-7C18,2.239,15.757-.004,13-.004Zm11,9v12.854c0,.793-.435,1.519-1.134,1.894-.318.171-.667.255-1.015.256-.416,0-.831-.121-1.19-.36l-3.964-2.644h-5.697c-1.45,0-2.747-.631-3.661-1.62l.569-.38h5.092c3.859,0,7-3.141,7-7v-7c0-.308-.027-.608-.065-.906,2.311.44,4.065,2.469,4.065,4.906Z"
     ],
     ['request',
@@ -49,26 +53,25 @@ export class ChatComponent {
 
 
   async ngOnInit() {
-    const saved = localStorage.getItem('user_id');
-    if (saved) {
-      const user = JSON.parse(saved);
-      this.userService.userId = user.userid;
+    const saveduser = localStorage.getItem('user');
+    if (saveduser) {
+      const user = JSON.parse(saveduser);
+      this.userService.user = user;
     }
-
-    this.userService.chat_now = { type: 'friend' }
-    this.userService.friend_chat = { friend_id: 2, friend_name: "bas" }
-
     this.tabFocus = 'chat_room';
-    console.log('userid from chat page= ', this.userService.userId)
     this.getUser();
     this.getRequest();
     this.getFriend();
+    this.userService.getRoom(this.chatfocus);
 
   }
 
+  /////////////////////////////////// API ////////////////////////////////////
 
+  searchusername = '';
   getUser() {
-    const url = `http://localhost:4000/getalluser?userid=${this.userService.userId}`;
+
+    const url = `http://localhost:4000/getalluser?userid=${this.userService.user?.userid}&username=${this.searchusername}`;
     fetch(url, {
       method: 'GET',
       headers: {
@@ -77,8 +80,15 @@ export class ChatComponent {
     })
       .then(res => res.json())
       .then(data => {
-        this.alluser = data.allusers;
-        console.log('alluser = ', this.alluser);
+
+        if (data.success) {
+          this.alluser = data.allusers;
+          console.log('alluser = ', this.alluser);
+
+        } else {
+          alert(data.message)
+        }
+
       })
       .catch(err => {
         console.error('❌ Error:', err);
@@ -86,7 +96,7 @@ export class ChatComponent {
   }
 
   getRequest() {
-    const url = `http://localhost:4000/getrequest?userid=${this.userService.userId}`;
+    const url = `http://localhost:4000/getrequest?userid=${this.userService.user?.userid}`;
 
     fetch(url, {
       method: 'GET',
@@ -110,7 +120,7 @@ export class ChatComponent {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ userid: this.userService.userId, friendid: friend.userid })
+      body: JSON.stringify({ userid: this.userService.user?.userid, friendid: friend.userid })
     })
       .then(res => res.json())
       .then(data => {
@@ -129,7 +139,7 @@ export class ChatComponent {
 
   async getFriend() {
     try {
-      const res = await fetch(`http://localhost:4000/getallfriends?userid=${this.userService.userId}`, {
+      const res = await fetch(`http://localhost:4000/getallfriends?userid=${this.userService.user?.userid}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
@@ -149,6 +159,28 @@ export class ChatComponent {
     }
   }
 
+  // async getRoom() {
+  //   try {
+  //     const res = await fetch(`http://localhost:4000/getallrooms?userid=${this.userService.userId}&type=${this.chatfocus}`, {
+  //       method: 'GET',
+  //       headers: {
+  //         'Content-Type': 'application/json'
+  //       }
+  //     });
+
+  //     const data = await res.json();
+
+  //     if (data.success) {
+  //       this.allrooms = data.allrooms;
+  //       console.log('all rooms = ', this.allrooms);
+  //     } else {
+  //       alert(data.message);
+  //     }
+  //   } catch (err) {
+  //     console.error('❌ Error:', err);
+  //   }
+  // }
+
   responseRequest(request: { from_user: number, from_username: string, status: string, to_user: number, to_username: string }, type: string) {
     console.log(request, 'type= ', type)
 
@@ -158,7 +190,7 @@ export class ChatComponent {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ userid: this.userService.userId, friendid: request.from_user, type: type })
+      body: JSON.stringify({ userid: this.userService.user?.userid, friendid: request.from_user, type: type })
     })
       .then(res => res.json())
       .then(data => {
@@ -177,15 +209,8 @@ export class ChatComponent {
   //////////////////////////// for message ///////////////////////////////
 
 
-  async changeChat(f: { friend_id: number; friend_name: string }, type: string) {
-    this.userService.chat_now = { type: type };
-    this.userService.friend_chat = f;
-    localStorage.setItem('chat_now', JSON.stringify({ type: type }));
-    await this.userService.getfriendchat(f.friend_id);
-
-    this.userService.chatchanged.next();  // <-- แจ้งว่ามีการเปลี่ยน chat
-
-    console.log('chat with = ', this.userService.friend_chat);
+  async changeChat(x: any, type: string) {
+    return await this.userService.changeChat(x, type)
   }
 
   chatlist = ['All', 'Friend', 'Team']
@@ -194,7 +219,7 @@ export class ChatComponent {
     this.chatfocus = i;
   }
 
-  tabTask = ['chat_room', 'request', 'searchfriend'];
+  tabTask = ['chatroom', 'request', 'searchfriend'];
   tabFocus = '';
   changeTab(value: string) {
     this.tabFocus = value;

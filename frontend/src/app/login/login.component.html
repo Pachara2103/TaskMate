@@ -1,13 +1,90 @@
+<div class="login-container">
+
+    <div class="login-box">
+        <div [style.marginBottom.px]="signup ? 30 : 50"
+            style="flex-direction: column; display: flex; text-align: center; width: 100%;">
+            <label style="font-size: 40px; font-weight: bold;">{{signup ? "Sign up":"Login"}}</label>
+            <label style="font-size: 16px; color: #a1a1a1;">Please enter your detail</label>
+        </div>
+
+        <section id="signin">
+
+            <div class="box" *ngIf="!signup">
+
+                <div class="input-box">
+                    <label> Email</label>
+                    <input type="text" [(ngModel)]="email">
+                </div>
+
+                <div class="input-box">
+                    <label> Password</label>
+                    <input type="password" [(ngModel)]="password" (keyup.enter)="sendLogin(email, password)">
+                </div>
+
+                <button class="button" (click)="sendLogin(email, password)">Sign in</button>
+                <button class="google">Sign in with Google</button>
+
+                <div style="flex-direction: row; display: flex; justify-content: center; margin: 10px;">
+                    <label style="color: #a1a1a1;">Don't have a account ? </label>
+                    <label (click)="changeSign()"
+                        style="text-decoration:underline; margin-left: 10px; color: #036cff; cursor: pointer;">
+                        Signup
+                    </label>
+                </div>
+            </div>
+
+        </section>
+
+        <section id="signup">
+            <div class="box" *ngIf="signup">
+
+                <div class="input-box">
+                    <label> Username</label>
+                    <input type="text"  [(ngModel)]="username">
+                </div>
+
+                <div class="input-box">
+                    <label> Email</label>
+                    <input type="text" placeholder="example@gmail.com" [(ngModel)]="email">
+                </div>
+
+                <div class="input-box">
+                    <label> Password</label>
+                    <input type="password" [(ngModel)]="password">
+                </div>
+
+                <div class="input-box">
+                    <label> Confirm Password</label>
+                    <input type="password" [(ngModel)]="confrimpassword">
+                </div>
+
+                <button class="button" (click)="sendSignup(username, email, password, confrimpassword)">Sign up</button>
+
+                <div style="flex-direction: row; display: flex; justify-content: center; margin: 10px;">
+                    <label style="color: #a1a1a1;">Already have a account ? </label>
+                    <label (click)="changeSign()"
+                        style="text-decoration:underline; margin-left: 10px; color: #036cff; cursor: pointer;">
+                        Sign in </label>
+                </div>
+            </div>
+
+        </section>
+
+    </div>
+
+</div>
+
+<img src="images/login.png" style="width: 100vw; height: 100vh;">
 <style>
     .login-container {
         position: absolute;
-        margin: 80px;
-        bottom: 10px;
+        left: 8vw;
+        top: 8vh;
         border-radius: 100px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 
         background-color: #fff;
-        width: 40vw;
+        width: 32vw;
         height: 80vh;
         display: flex;
         justify-content: center;
@@ -15,10 +92,7 @@
 
         & .login-box {
             position: relative;
-            margin-bottom: 100px;
-            width: 55%;
-            height: 60%;
-            align-items: flex-start;
+            align-items: center;
             flex-direction: column;
             display: flex;
 
@@ -33,7 +107,6 @@
 
         & .input-box {
             flex-direction: column;
-            /* background-color: #da8181; */
             display: flex;
             margin-bottom: 20px;
         }
@@ -79,46 +152,3 @@
         }
     }
 </style>
-
-<div class="login-container">
-
-    <div class="login-box">
-        <div [style.marginBottom.px]="signup ? 30 : 50"
-            style="flex-direction: column; display: flex; text-align: center; width: 100%;">
-            <label style="font-size: 40px; font-weight: bold;">{{signup ? "Sign up":"Login"}}</label>
-            <label style="font-size: 16px; color: #a1a1a1;">Please enter your detail</label>
-        </div>
-
-        <div class="box">
-
-            <div class="input-box">
-                <label> Username</label>
-                <input type="text" placeholder="example@gmail.com" [(ngModel)]="username">
-            </div>
-
-            <div class="input-box">
-                <label> Password</label>
-                <input type="password" [(ngModel)]="password" (keyup.enter) ="sendLogin(username, password)" >
-            </div>
-
-            <div *ngIf="signup" class="input-box">
-                <label> Confirm Password</label>
-                <input type="password" >
-            </div>
-
-            <button class="button" (click)="sendLogin(username, password)">{{signup?"Sign up":"Sign in"}}</button>
-            <button class="google">{{signup? "Sign up with Google":"Sign in with Google"}}</button>
-
-            <div style="flex-direction: row; display: flex; justify-content: center; margin: 10px;">
-                <label style="color: #a1a1a1;">{{signup? "Already have a account ?":"Don't have a account ?"}} </label>
-                <label (click)="changeSign()"
-                    style="text-decoration:underline; margin-left: 10px; color: #036cff; cursor: pointer;">
-                    {{signup? "Sign in":"Sign up"}}</label>
-            </div>
-        </div>
-
-    </div>
-
-</div>
-
-<img src="images/login.png" style="width: 100vw; height: 100vh;">

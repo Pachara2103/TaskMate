@@ -21,6 +21,13 @@ export class AddTaskComponent {
     private userService: UserService,
 
   ) { }
+  async ngOnInit() {
+    const saveduser = localStorage.getItem('user');
+    if (saveduser) {
+      const user = JSON.parse(saveduser);
+      this.userService.user = user;
+    }
+  }
 
   titleName = '';
   description = '';
@@ -127,13 +134,13 @@ export class AddTaskComponent {
 
   addtask() {
     console.log('detail= ', this.detailList)
-      console.log('subdetail= ', this.subdetailList)
+    console.log('subdetail= ', this.subdetailList)
     fetch(`http://localhost:4000/addtask`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ userid: this.userService.userId, title: this.titleName, description: this.description, category: this.tag.join(','), start_time: this.startDate, end_time: this.endDate, type_task: 'mytask', main_task: this.detailList, sub_task: this.subdetailList})
+      body: JSON.stringify({ userid: this.userService.user?.userid, title: this.titleName, description: this.description, category: this.tag.join(','), start_time: this.startDate, end_time: this.endDate, type_task: 'mytask', main_task: this.detailList, sub_task: this.subdetailList })
     })
       .then(res => res.json())
       .then(data => {

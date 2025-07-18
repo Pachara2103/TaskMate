@@ -16,83 +16,77 @@ export class LoginComponent {
     private userService: UserService,
 
   ) { }
-
+  async ngOnInit() {
+    const saveduser = localStorage.getItem('user');
+    if (saveduser) {
+      localStorage.removeItem('user')
+    }
+  }
+  //////sign up///////
+  username: string = "";
+  email = '';
+  password: string = "";
+  confrimpassword = '';
 
   signup = false;
 
   changeSign() {
     this.signup = !this.signup;
-    console.log("sign up= ", this.signup)
   }
 
-  username: string = "";
-  password: string = "";
+  async sendLogin(email: string, password: string) {
 
-  sendLogin(username: string, password: string) {
-    if (this.signup) {
-      console.log('this is sign up')
+    const res = await fetch('http://localhost:4000/login', {
+      method: 'POST',
+      credentials: 'include', // คุณใช้ cookie ในการ login/auth 
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email, password })
+    })
+
+    const data = await res.json();
+
+    if (data.success) {
+      await this.userService.authentication();
+      this.router.navigate(['/Dashboard']);
+
     } else {
-      console.log("username", username, "password", password);
-      fetch('http://localhost:4000/login', {
+      alert(`Login failed! ${data.message}`,);
+    }
+  }
+
+
+  async sendSignup(username: string, email: string, password: string, confrimpassword: string) {
+    if (!(email.trim() || password.trim() || confrimpassword.trim() || username.trim())) {
+      alert('please fill information');
+    }
+    else if (password != confrimpassword) {
+      alert('password not the same');
+    }
+    else {
+      const res = await fetch('http://localhost:4000/signup', {
         method: 'POST',
-        credentials: 'include', // ✅ ต้องมี
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ email, password, username })
       })
-        .then(res => res.json())
-        .then(data => {
-          if (data.success) {
-
-            this.login();
-            setTimeout(() => {
-              this.router.navigate(['/Dashboard']);
-            }, 1000);
-
-          } else {
-            alert(`Login failed! message: ${data.message}`,);
-          }
-        })
-        .catch(err => {
-          console.error('❌ Error:', err);
-        });
-
-    }
-
-  }
-
-  async login() {
-    await this.authentication();
-    this.userService.connectWs();
-  }
-
-  async authentication(): Promise<void> {
-
-    try {
-      const res = await fetch(`http://localhost:4000/me`, {
-        method: 'GET',
-        credentials: 'include', //เรียกใช้ cookies
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
 
       const data = await res.json();
 
       if (data.success) {
-        this.userService.userId = data.user.userid;
-        this.userService.username = data.user.username;
-        localStorage.setItem('user_id', JSON.stringify({ userid: data.user.userid }));
-        console.log('login successfully')
-        console.log('userid= ', this.userService.userId, "username=", this.userService.username);
-      } else {
-        alert(`Login failed! message: ${data.message}`,);
-        this.router.navigate(['/']);
-      }
-    } catch (err) {
-      console.error('❌ Error:', err);
-    }
+        alert(data.message);
+        this.signup = false;
 
+      } else {
+        alert(data.message);
+      }
+
+    }
   }
+
+
+
+
 }

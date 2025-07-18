@@ -6,25 +6,38 @@ import { provideCharts, BaseChartDirective } from 'ng2-charts';
 import { ChatComponent } from '../chat/chat.component';
 import { UserService } from '../services/user.service';
 
-
-
 @Component({
-  selector: 'app-teamtask',
-  imports: [NgFor, NgIf, NgClass, NgStyle, BaseChartDirective, FormsModule, ChatComponent],
+  selector: 'app-task',
   standalone: true,
+  imports: [NgFor, NgIf, NgClass, NgStyle, BaseChartDirective, FormsModule, ChatComponent],
+  templateUrl: './task.component.html',
+  styleUrl: './task.component.css',
   providers: [provideCharts()],
-  templateUrl: './teamtask.component.html',
-  styleUrl: './teamtask.component.css'
+
 })
-export class TeamtaskComponent {
+export class TaskComponent {
   category = [];
   ngOnInit() {
+
+    const saveduser = localStorage.getItem('user');
+    if (saveduser) {
+      const user = JSON.parse(saveduser);
+      this.userService.user = user;
+    }
     this.getTasks();
   }
   constructor(
     private userService: UserService,
 
   ) { }
+
+  getimg(x: string) {
+    return this.imgsrc.get(x);
+  }
+
+  trackByIndex(index: number, item: any): number {
+    return index;
+  }
   imgsrc: Map<string, string> = new Map([
     ['books',
       "m23.121.879c-1.17-1.17-3.072-1.17-4.242 0l-6.707 6.707c-.756.755-1.172 1.76-1.172 2.828v1.586c0 .552.447 1 1 1h1.586c1.068 0 2.073-.417 2.828-1.172l6.707-6.707c1.164-1.117 1.164-3.126 0-4.243zm-1.414 2.828-6.707 6.707c-.378.378-.88.586-1.414.586h-.586v-.586c0-.526.214-1.042.586-1.414l6.707-6.707c.391-.39 1.023-.39 1.414 0 .388.372.388 1.042 0 1.414zm-9.707 14.293c-.553 0-1-.447-1-1s.447-1 1-1h3c.553 0 1 .447 1 1s-.447 1-1 1zm8-4v5c0 2.757-2.243 5-5 5h-10c-2.757 0-5-2.243-5-5v-14c0-2.757 2.243-5 5-5h9c.553 0 1 .448 1 1s-.447 1-1 1h-9c-1.654 0-3 1.346-3 3v14c0 1.654 1.346 3 3 3h10c1.654 0 3-1.346 3-3v-5c0-.553.447-1 1-1s1 .447 1 1zm-10.833-2.333-1.687 1.687c-.431.431-.995.648-1.561.648-.533 0-1.066-.193-1.491-.582l-.669-.579c-.417-.362-.462-.994-.101-1.411.363-.419.994-.461 1.411-.101l.689.598c.103.093.228.092.307.013l1.687-1.687c.391-.391 1.023-.391 1.414 0s.391 1.023 0 1.414zm0-4.96-1.687 1.687c-.431.431-.995.648-1.561.648-.533 0-1.066-.193-1.491-.582l-.669-.579c-.417-.362-.462-.994-.101-1.411.363-.418.994-.461 1.411-.101l.689.598c.103.094.228.092.307.013l1.687-1.687c.391-.391 1.023-.391 1.414 0s.391 1.023 0 1.414zm0 8.546c.391.391.391 1.023 0 1.414l-1.687 1.687c-.431.431-.995.648-1.561.648-.533 0-1.066-.193-1.491-.582l-.669-.579c-.417-.362-.462-.993-.101-1.411.363-.417.994-.462 1.411-.101l.689.598c.103.093.228.092.307.013l1.687-1.687c.391-.391 1.023-.391 1.414 0z"
@@ -63,41 +76,10 @@ export class TeamtaskComponent {
     ]
   ]);
 
-  alltasks: Array<{
-    task_id: number,
-    title: string,
-    description: string,
-    category: string,
-    type: string,
-    start_time: Date, end_time: Date,
-    detail: Array<Array<{ detail_id: number, tasks: string, status: string, subtasks: Array<{ subtask: string, status: string }> }>>
-  }> = []
+  ////////////////////////////////////////// API ////////////////////////////////////////////
 
-
-  getimg(x: string) {
-    return this.imgsrc.get(x);
-  }
-
-  trackByIndex(index: number, item: any): number {
-    return index;
-  }
-
-  async getTasks() {
-    try {
-      const url = `http://localhost:4000/getalltasks?userid=${this.userService.userId}`;
-      const res = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-      });
-
-      const data = await res.json();
-      this.alltasks = data.alltasks;
-      console.log('alltasks = ', this.alltasks);
-    } catch (err) {
-      console.error('❌ Error:', err);
-    }
+  getTasks() {
+    return this.userService.getTasks(this.tabfocus);
   }
 
 
@@ -140,13 +122,132 @@ export class TeamtaskComponent {
     }
   }
 
+  async bookmark(x: boolean, task_id: number) {
+    console.log('press bookmark')
+    const target = this.alltasks.find(task => task.task_id === task_id);
+    if (target) {
+      target.bookmark = !x;
+    }
+
+    try {
+      const res = await fetch(`http://localhost:4000/updatebookmark`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ ismark: !x, task_id: task_id })
+      });
+      // const data = await res.json();
+
+    } catch (err) {
+      console.error('❌ Error:', err);
+    }
+  }
+  noRoomTasks: { [key: string]: boolean } = {};
+  room_task: { task_id: number, title: string } | null = null;
+  iscreateroom: boolean = false;
+  room_name = '';
+
+  cancel() {
+    this.room_task = null;
+  }
+  create() {
+    this.iscreateroom = true;
+  }
+  cancelroom() {
+    this.iscreateroom = false;
+    this.room_task = null;
+
+  }
+  async submitroom() {
+    this.userService.ws.send(JSON.stringify({ userId: this.userService.user?.userid, type: "create_room", roomName: this.room_name }));
+    this.userService.getRoom('All');
+    const task = this.alltasks.find(t => t.task_id === this.room_task?.task_id);
+
+    const res = await fetch(`http://localhost:4000/updatetasksbyroomid`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ userId: this.userService.user?.userid, roomName: this.room_name, task_id: this.room_task?.task_id })
+    });
+
+    const data = await res.json();
+    if (task) {
+      task.room_id = data.roomid;
+    }
+
+    this.iscreateroom = false;
+    this.room_task = null;
+
+  }
+
+  async roomchat(roomid: string, task_id: number, title: string) {
+    this.room_task = { task_id: task_id, title: title };
+    console.log('press room chat')
+    if (roomid === null) {
+      this.noRoomTasks[task_id] = true;
+    } else {
+      delete this.noRoomTasks[task_id];
+      const room = this.userService.allrooms.find(r => r.roomid === roomid);
+      await this.userService.changeChat(room, 'room')
+    }
+  }
+
+
+  /////////////////////////////////////////task/////////////////////////////////////////////
+
+  get alltasks() {
+    return this.userService.alltasks;
+  }
+
+  tab = ['All', 'Mytask', 'Teamtask', 'Deadline', 'Completed']
+  tabfocus = 'All';
+  chtabfocus(x: string) {
+    this.tabfocus = x;
+    this.getTasks();
+  }
+
+  icons: Array<string[]> = [
+    ['bookmark',
+      "M2.849,23.55a2.954,2.954,0,0,0,3.266-.644L12,17.053l5.885,5.853a2.956,2.956,0,0,0,2.1.881,3.05,3.05,0,0,0,1.17-.237A2.953,2.953,0,0,0,23,20.779V5a5.006,5.006,0,0,0-5-5H6A5.006,5.006,0,0,0,1,5V20.779A2.953,2.953,0,0,0,2.849,23.55Z"
+    ],
+    ['roomchat',
+      "m7.5 13a4.5 4.5 0 1 1 4.5-4.5 4.505 4.505 0 0 1 -4.5 4.5zm7.5 7a5.006 5.006 0 0 0 -5-5h-5a5.006 5.006 0 0 0 -5 5v4h15zm2.5-11a4.5 4.5 0 1 1 4.5-4.5 4.505 4.505 0 0 1 -4.5 4.5zm1.5 2h-5a4.793 4.793 0 0 0 -.524.053 6.514 6.514 0 0 1 -1.576 2.216 7.008 7.008 0 0 1 5.1 6.731h7v-4a5.006 5.006 0 0 0 -5-5z"
+    ]
+
+  ];
+
+
+  months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  getDate(i: Date | string): string {
+    const date = new Date(i);
+    const day = date.getDate();
+    const month = this.months[date.getMonth()];
+    const year = date.getFullYear();
+    return `${day} ${month} ${year}`;
+  }
+
+  categoryColor: Map<string, Array<string>> = new Map([
+    ['Work', ['#fcf4ecff', '#f37e00ff']], ['Homework', ['#efecfc', '#46359a']]
+  ])
+  tagColor: Map<string, Array<string>> = new Map([
+    ['Work', ['#efecfd', '#413291']], ['Homework', ['#f4f9f5', '#359b74']]
+  ])
+
+  getcategoryColor(x: string) {
+    return this.categoryColor.get(x)!;
+  }
+  getarraycategory(x: string) {
+    return x.split(',')
+  }
+
   getCheckIconByStatus(status: string): string {
     return status === 'completed' ? this.getimg('checkbox')! : this.getimg('circle')!;
   }
 
-  tagColor: Map<string, Array<string>> = new Map([
-    ['Work', ['#efecfd', '#413291']], ['Homework', ['#f4f9f5', '#359b74']]
-  ])
+  /////////////////////////////////////////////show task////////////////////////////////
+
 
   @ViewChild('showtask') boxRef!: ElementRef<HTMLDivElement>;
 
@@ -192,121 +293,123 @@ export class TeamtaskComponent {
 
   }
 
-  months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  getDate(i: Date | string): string {
-    const date = new Date(i);
-    const day = date.getDate();
-    const month = this.months[date.getMonth()];
-    const year = date.getFullYear();
-    return `${day} ${month} ${year}`;
-  }
-
-
-
-  tab = ['All', 'Started', 'Completed', 'test']
-  test = false;
-  c() {
-    console.log('click to xcpand')
-    this.test = !this.test;
-  }
-
-
-
-  getDeadline(start: Date, end: Date) {
+  getDeadline(start: Date, end: Date): Array<string> {
     const now = new Date();
+    const nowTime = now.getTime();
+    const startTime = (new Date(start)).getTime();
+    const endTime = (new Date(end)).getTime();
 
-    if (now < start) {
-      // ยังไม่ถึงวันเริ่ม
-      const diffTime = start.getTime() - now.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return `Starts in ${diffDays} day${diffDays > 1 ? 's' : ''}`;
+    if (nowTime < startTime) {
+      const diffDays = Math.ceil((startTime - nowTime) / (1000 * 60 * 60 * 24));
+      return [`Starts in ${diffDays} day${diffDays > 1 ? 's' : ''}`, '#dcedd8ff', '#1ca425ff'];
     }
 
-    if (now >= start && now <= end) {
-      // อยู่ในช่วงระหว่าง start ถึง end
-      const diffTime = end.getTime() - now.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return `${diffDays} day${diffDays !== 1 ? 's' : ''} left`;
-    }
+    if (nowTime >= startTime && nowTime <= endTime) {
+      const diffDays = Math.ceil((endTime - nowTime) / (1000 * 60 * 60 * 24));
 
-    // ถ้าเลยวันสิ้นสุดแล้ว
-    return 'Deadline passed';
-  }
-
-
-  doughnutChartType: ChartType = 'doughnut';
-
-  getPercent(task: Array<Array<{ tasks: string, status: string, subtasks: Array<{ subtask: string, status: string }> }>>): number {
-    let done = 0;
-    let total = 0;
-
-    for (const group of task) {
-      for (const detail of group) {
-        for (const sub of detail.subtasks) {
-          total++;
-          if (sub.status === 'completed') {
-            done++;
-          }
-        }
+      if (diffDays >= 7) {
+        const week = Math.floor(diffDays / 7);
+        return [`${week} week${week > 1 ? 's' : ''} left`, '#dcedd8ff', '#1ca425ff'];
+      } else if (diffDays <= 3 && diffDays > 0) {
+        return [`${diffDays} day${diffDays !== 1 ? 's' : ''} left`, '#ffededff', '#db1c1cff'];
+      } else {
+        return [`${diffDays} day${diffDays !== 1 ? 's' : ''} left`, '#ebebebff', '#bac21dff'];
       }
     }
 
-    if (total === 0) return 0;
-    return Math.round((done / total) * 100);
+    const overdueDays = Math.ceil((nowTime - endTime) / (1000 * 60 * 60 * 24));
+    return [`Overdue by ${overdueDays} day${overdueDays > 1 ? 's' : ''}`, '#f5f5f5ff', '#878787ff'];
   }
 
 
-  doughnutChartOptions: ChartOptions<'doughnut'> = {
+  getPercent(task: any) {
+    return this.userService.getPercent(task);
+  }
+
+
+  progressChartOptions: ChartOptions<'bar'> = {
+    indexAxis: 'y', // แนวนอน
     responsive: true,
-    // rotation: -Math.PI / 2,      
-    // circumference: 540,
-    cutout: '60%', // ทำให้เป็นวงแหวน
+    maintainAspectRatio: false, // สำคัญมาก! ปล่อยให้ height ตาม container
     plugins: {
-      legend: {
-        display: false
+      legend: { display: false },
+      tooltip: { enabled: false }
+    },
+    scales: {
+      x: {
+        display: false,
+        stacked: true, // ให้ bar ซ้อนกันเหมือน progress
+        min: 0
+      },
+      y: {
+        display: false,
+        stacked: true
       }
     }
   };
 
-  getDoneTask(task: Array<Array<{ tasks: string, status: string, subtasks: Array<{ subtask: string, status: string }> }>>): number {
-    let doneCount = 0;
-    for (const group of task) {
-      for (const detail of group) {
-        for (const sub of detail.subtasks) {
-          if (sub.status === 'completed') {
-            doneCount++;
-          }
-        }
-      }
-    }
-    return doneCount;
-  }
 
-  assigncharts(task: Array<Array<{ tasks: string, status: string, subtasks: Array<{ subtask: string, status: string }> }>>): ChartData<'doughnut', number[], string> {
-    let done = 0;
-    let notDone = 0;
+  assignProgressChart(task: Array<Array<{ tasks: string, status: string, subtasks: Array<{ subtask: string, status: string }> }>>): ChartData<'bar', number[], string> {
 
-    for (const group of task) {
-      for (const detail of group) {
-        for (const sub of detail.subtasks) {
-          if (sub.status === 'completed') {
-            done++;
-          } else {
-            notDone++;
-          }
-        }
-      }
+    const number = this.getPercent(task);
+    let done = number[2];
+    let total = number[1];
+
+    // fallback ถ้า total == 0 (เพื่อให้ bar แสดง)
+    if (total === 0) {
+      total = 1;
     }
 
     return {
-      // labels: [`${this.getPercent(task)}%`],
+      labels: ['Progress'],
       datasets: [
         {
-          data: [notDone, done],
-          backgroundColor: ['#e0e0e0', '#4caf50'], // เขียว / เทา
-          hoverBackgroundColor: ['#bdbdbd', '#388e3c']
+          data: [done],
+          backgroundColor: '#4caf50', // เขียว
+          barThickness: 10
+        },
+        {
+          data: [total - done],
+          backgroundColor: '#e0e0e0',
+          barThickness: 10
         }
       ]
     };
   }
+
+  ///////////////////////////////////////////////////////////////
+  // TypeScript (Angular)
+  selectedFile: File | null = null;
+
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+      console.log('file = ', file)
+    }
+  }
+
+  async uploadProfile() {
+    if (!this.selectedFile) {
+      alert('กรุณาเลือกไฟล์ก่อน');
+      return;
+    }
+    const formData = new FormData();
+    formData.append('file', this.selectedFile);
+    formData.append('userid', String(this.userService.user!.userid)); //รับเเค่ string
+
+    const res = await fetch('http://localhost:4000/upload', {
+      method: 'POST',
+      body: formData
+
+    })
+
+    const data = await res.json();
+    alert(data.message)
+
+  }
+
+
+
+
 }

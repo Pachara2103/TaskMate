@@ -8,10 +8,25 @@ import {
   Tooltip,
   Legend,
   DoughnutController,
-  Title
+  Title,
+  BarController,
+  BarElement,
+  CategoryScale,
+  LinearScale
 } from 'chart.js';
 
-Chart.register(ArcElement, Tooltip, Legend, DoughnutController, Title);
+Chart.register(
+  ArcElement,
+  Tooltip,
+  Legend,
+  DoughnutController,
+  Title,
+  BarController,
+  BarElement,
+  CategoryScale,
+  LinearScale
+);
+
 
 bootstrapApplication(AppComponent, appConfig)
   .catch((err) => console.error(err));

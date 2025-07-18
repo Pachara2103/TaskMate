@@ -1,16 +1,26 @@
 <div class="container">
+    <div style="width: 100px; height: 100px; background-color: #f1f1f1; position: absolute; top: 0; z-index: 100;">
+        <!-- HTML -->
+        <input type="file" (change)="onFileSelected($event)" accept="image/*">
+        <button (click)="uploadProfile()">Upload</button>
+
+
+    </div>
     <div class="content">
+
 
         <header class="header">
 
             <div style="flex-direction: row; display: flex; justify-content: space-between; padding: 1rem;">
-                <label style="font-size: 25px; font-weight: bold;"> Team Task</label>
+                <label style="font-size: 25px; font-weight: bold;">All Task</label>
                 <button>Add new task</button>
             </div>
 
-            <div style="flex-direction: row; display: flex; justify-content: space-between; padding: 1rem;">
+            <div
+                style="flex-direction: row; display: flex; justify-content: space-between; position: absolute; bottom: 0;">
                 <div class="tab">
-                    <div *ngFor="let item of tab; let i = index">{{item}}</div>
+                    <div *ngFor="let item of tab; let i = index" [ngClass]="tabfocus===item? 'tab-focus':'tab-nfocus'"
+                        style="cursor: pointer;" (click)="chtabfocus(item)">{{item}}</div>
                 </div>
             </div>
 
@@ -21,28 +31,60 @@
             <div *ngFor="let task of alltasks; let i = index; trackBy: trackByIndex" (click)="changeTask(task, i)"
                 [ngClass]="['box-container', boxIndex === i ? 'focus' : '']">
 
-                <div class="img-box">
-                    <svg viewBox="-1 0 24 24" width="70%" height="70%" style="fill: white;">
-                        <path [attr.d]="getimg('books')"></path>
-                    </svg>
-                </div>
 
                 <div class="box">
 
-                    <div
-                        style="background-color: #27ca66; justify-content: center; display: flex; margin-top: 35px; font-size: 20px;">
-                        {{ task.title}}
-
-                    </div>
-
-                    <div style="background-color: #27ca66; justify-content: center; display: flex; font-size: 15px;">
-                        {{ task.description}}
-                    </div>
-
-                    <div class="type-box">
-                        <div style=" background-color: #edbb5e; padding: 2px; border-radius: 10px; color: #fff;">
-                            {{task.category}}
+                    <div style="flex-direction: row; display: flex; padding: 15px; gap: 10px; flex-wrap: wrap; ">
+                        <div
+                            style=" width: 40px; height: 40px;border-radius: 15%;cursor: pointer;background-color: #27ca66;align-items: center; justify-content: center; display: flex; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4)">
+                            <svg viewBox="-1 0 24 24" width="70%" height="70%" style="fill: white;">
+                                <path [attr.d]="getimg('books')"></path>
+                            </svg>
                         </div>
+
+                        <div
+                            style="flex-direction: column; display: flex; justify-content: flex-start; background-color: #edbb5e;">
+
+                            <div style=" font-size: 20px;">{{ task.title}}</div>
+                            <div style="font-size: 15px;"> {{ task.description}} </div>
+
+                        </div>
+                    </div>
+
+
+
+                    <div
+                        style="background-color: #90b9ff;height: 20px; width: 100%; position: relative;padding-left:15px; padding-right: 15px;
+                        flex-direction: column; display: flex; justify-content: flex-end; box-sizing: border-box; margin-top: 10px;">
+                        <label style="position: absolute; top:-15px; right: 15px;">{{getPercent(task.detail)[0]}}%
+                        </label>
+
+                        <canvas baseChart [data]="assignProgressChart(task.detail)" [type]="'bar'"
+                            [options]="progressChartOptions">
+                        </canvas>
+
+                    </div>
+
+                    <div style=" flex-direction: row; display: flex; justify-content: space-between;">
+
+                        <div style="flex-direction: row; display: flex; padding-left: 15px; padding-top: 10px;gap:6px">
+
+                            <div *ngFor="let i of getarraycategory(task.category)"
+                                style="padding: 2px; border-radius: 5px; font-size: 15px;"
+                                [ngStyle]="{'background-color': getcategoryColor(i)[0], 'color': getcategoryColor(i)[1]}">
+                                {{i}}
+                            </div>
+
+                        </div>
+
+                        <!-- <div style="flex-direction: row; display: flex;font-size: 15px; gap: 10x; ">
+
+                            <div style=" background-color: #edbb5e; padding: 2px; border-radius: 10px; color: #fff;">
+                                {{task.category}}
+                            </div>
+
+                        </div> -->
+
 
                         <!-- <div
                             style="width: 100%; height: 100%; background-color: #90b9ff; justify-content: center; align-items: center; display: flex;">
@@ -57,28 +99,102 @@
 
                     </div>
 
-                    <div class="progress">
-                        <canvas baseChart [data]="assigncharts( task.detail)" [type]="'doughnut'"
-                            [options]="doughnutChartOptions">
-                        </canvas>
+                    <div
+                        style="flex-direction: row; display: flex; justify-content: space-between; padding:10px ; z-index: 100;">
+                        <div style="font-size: 15px; border-radius: 10px;flex-direction: row;display: flex; gap: 5px;color: #fff;padding: 3px;"
+                            [ngStyle]="{'background-color': getDeadline(task.start_time, task.end_time)[1]}">
+                            <div style="width: 20px; height: 20px; align-items: center; display: flex;">
+                                <svg viewBox="0 0 24 24" width="100%" height="100%"
+                                    [ngStyle]="{'fill': getDeadline(task.start_time, task.end_time)[2]}">
+                                    <path [attr.d]="getimg('clock')"></path>
+                                </svg>
 
-                        <label style="position: absolute; right: 15px; top:20px;">{{getPercent(task.detail)}}% </label>
-                    </div>
+                            </div>
 
-                    <div class="deadline-box">
-                        <div style="width: 20px; height: 100%; align-items: center; display: flex;">
-                            <svg viewBox="0 0 24 24" width="100%" height="100%" style="fill: white;">
-                                <path [attr.d]="getimg('clock')"></path>
-                            </svg>
+                            <div [ngStyle]="{'color': getDeadline(task.start_time, task.end_time)[2]}">
+                                {{getDeadline(task.start_time, task.end_time)[0]}}</div>
+                        </div>
+
+                        <div style="flex-direction: row; display: flex; gap: 5px;">
+
+                            <div *ngFor="let icon of icons" (click)="$event.stopPropagation()">
+                                <div style="width: 20px; height: 20px;background-color: #27ca66;"
+                                    (click)="icon[0]==='roomchat' ? roomchat(task.room_id, task.task_id, task.title):bookmark(task.bookmark, task.task_id)">
+                                    <svg viewBox="0 0 24 24" width="100%" height="100%"
+                                        [ngStyle]="{'fill': task.bookmark && icon[0]==='bookmark'? '#FFCC00': 'black'}">
+                                        <path [attr.d]="icon[1]"></path>
+                                    </svg>
+
+                                </div>
+
+
+                            </div>
+
+
 
                         </div>
-                        {{getDeadline(task.start_time, task.end_time)}}
+
+
+                    </div>
+
+                    <div *ngIf="!(task.room_id===null)">room name: {{task.room_id}}</div>
+
+
+
+
+                </div>
+
+
+            </div>
+
+            <section id="room_warning">
+                <div *ngIf="room_task != null && noRoomTasks[room_task.task_id]" style="position: fixed; top: 0;right: 0; width: 100vw; height: 100vh;
+            background-color: rgba(0, 0, 0, 0.3); 
+            backdrop-filter: blur(1.5px); 
+            z-index: 1000; display: flex; justify-content: center; align-items: center;">
+
+                    <div style="flex-direction: column;  display: flex;  justify-content: center; align-items: center;">
+                        <div
+                            style="background-color: #eb6f6f; padding: 20px; border-radius: 8px; color: white; box-shadow: 0 0 10px rgba(0,0,0,0.5); max-width: 16vw;">
+                            You don't have room for this task. Do you want to create room?
+                            <div
+                                style="flex-direction: row; display: flex; justify-content: center; align-items: center; margin-top: 15px; gap: 10px;">
+                                <button (click)="cancel()">Cancel</button>
+                                <button (click)="create()">Create</button>
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </section>
+
+            <section id="create room">
+                <div *ngIf="iscreateroom"
+                    style="position: fixed; top: 0;right: 0; width: 100vw; height: 100vh;background-color: rgba(0, 0, 0, 0.3); backdrop-filter: blur(1.5px); z-index: 1000; display: flex; justify-content: center; align-items: center;">
+
+
+                    <div
+                        style="background-color: rgba(255, 255, 255, 0.8);padding: 20px; border-radius: 8px; color: white; box-shadow: 0 0 10px rgba(0,0,0,0.5); max-width: 16vw;">
+                        <input type="text"
+                            style="border:none; border-bottom: solid 2px #333; outline: none; width: 16vw; height: 40px; background-color: rgba(255, 255, 255, 0.5); font-size: 15px; border-radius: 5px;"
+                            placeholder="Room name" [(ngModel)]="room_name">
+                        <div
+                            style="flex-direction: row; display: flex; justify-content: center; align-items: center; margin-top: 15px; gap: 10px;">
+                            <button (click)="cancelroom()">Cancel</button>
+                            <button (click)=" submitroom()">Add</button>
+                        </div>
                     </div>
 
 
                 </div>
 
-            </div>
+            </section>
+
+
+
+
 
 
         </main>
@@ -86,6 +202,7 @@
     </div>
 
     <app-chat></app-chat>
+
 
     <div #showtask id="showtask">
 
@@ -317,7 +434,7 @@
         border-radius: 10px;
     }
 
-   
+
     .row {
         flex-direction: row;
         display: flex;
@@ -349,20 +466,22 @@
             margin-bottom: 1rem;
 
             flex-direction: column;
-            background-color: aqua;
 
             & .header {
                 width: 100%;
                 height: 17%;
-                background-color: rgb(148, 148, 196);
+                background-color: #fff;
                 flex-direction: column;
                 display: flex;
+                border-radius: 10px;
+                position: relative;
             }
 
             & .list {
                 width: 100%;
                 height: 82%;
-                background-color: rgb(217, 217, 255);
+                height: 82%;
+                background-color: #f5f6f8;
                 flex-wrap: wrap;
                 /* ✅ ให้ล้นแล้วขึ้นบรรทัดใหม่ */
                 flex-direction: row;
@@ -375,8 +494,7 @@
     }
 
     .tab {
-        width: 25vw;
-        background-color: antiquewhite;
+        width: 30vw;
         height: 30px;
         flex-direction: row;
         justify-content: space-between;
@@ -384,6 +502,19 @@
         align-items: center;
         padding-left: 10px;
         padding-right: 10px
+    }
+
+    .tab-focus {
+        padding: 5px;
+        box-sizing: border-box;
+        background-color: #ebebeb;
+        border-bottom: solid 3px red;
+    }
+
+    .tab-nfocus {
+        padding: 5px;
+        box-sizing: border-box;
+        border-bottom: solid 3px #fff;
     }
 
     .focus {
@@ -397,81 +528,26 @@
         flex-direction: column;
         align-items: center;
         display: flex;
-        position: relative;
         transition: transform 0.3s ease;
-
         margin: 10px;
 
 
         & .box {
             background-color: #ffffff;
             width: 17vw;
-            height: 30vh;
-            border-radius: 10%;
+            height: 29vh;
+            border-radius: 10px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
             margin-top: 20px;
+            z-index: 1;
+            position: relative;
             cursor: pointer;
 
             flex-direction: column;
             display: flex;
             position: relative;
 
-            & .type-box {
-                font-size: 15px;
-                /* justify-content: space-between; */
-                margin: 10px;
-                border-radius: 10px;
-                flex-direction: row;
-                display: flex;
-                gap: 10px;
-            }
-
-            & .deadline-box {
-                font-size: 15px;
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                margin: 10px;
-                border-radius: 10px;
-                flex-direction: row;
-                display: flex;
-                gap: 10px;
-                background-color: #ff0000;
-                color: #fff;
-                padding: 2px;
-            }
-
-            & .progress {
-                background-color: #90b9ff;
-                position: absolute;
-                bottom: 0;
-                right: 0;
-                margin: 10px;
-                color: white;
-                width: 60px;
-                height: 60px;
-            }
-
-
         }
-
-        & .img-box {
-            width: 40px;
-            height: 40px;
-            border-radius: 15%;
-            cursor: pointer;
-            background-color: #27ca66;
-            align-items: center;
-            justify-content: center;
-            display: flex;
-            position: absolute;
-            top: 0;
-            z-index: 10;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-
-
-        }
-
     }
 
     .bottomimg {

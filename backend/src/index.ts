@@ -6,6 +6,12 @@ import { cors } from '@elysiajs/cors';
 
 import { cookie } from '@elysiajs/cookie'; // ✅ ต้อง import setCookie ด้วย
 import { jwt } from '@elysiajs/jwt';
+import staticPlugin from '@elysiajs/static';
+import { writeFileSync } from 'fs'
+import { join } from 'path'
+import { writeFile } from "fs/promises";
+
+
 
 interface Subtask {
   subtask: string;
@@ -39,27 +45,60 @@ const app = new Elysia()
     name: 'jwt',
     secret: 'my_secret',
   }))
+  .use(
+    staticPlugin({
+      prefix: '/uploads',
+      assets: './src/uploads'
+    })
+  )
 
-  .get('/', async () => {
-    const rows = await db`SELECT * FROM users`;
-    return JSON.stringify(rows);
+
+  .post('/upload', async ({ body }) => {
+    console.log('file=', body.file)
+    const { file, userid } = body;
+
+    try {
+
+      if (!file) {
+        console.log('upload failed');
+        return { success: false, message: 'No file uploaded' };
+      }
+
+      const buffer = await file.arrayBuffer();
+      const filename = `profile-${userid}.png`;
+      const filepath = join('./src/uploads', filename);
+      writeFileSync(filepath, Buffer.from(buffer));
+
+      console.log('upload success:', filename);
+      return { success: true, message: 'upload success', filename: filename };
+    } catch (error) {
+      console.error('Upload error:', error);
+      return { success: false, message: 'upload failed' };
+    }
+
+  }, {
+    body: t.Object({
+      file: t.File({ format: 'image/*' }),
+      userid: t.String()
+    })
   })
+
+  ///////////////////////////////////////////////////// login //////////////////////////////////////////////////////////////
+
 
   .get('/me', async ({ cookie, jwt }) => {
     const token = cookie.userCookies?.value;
     if (!token) return { success: false, message: 'No token found' };
-
     const user = await jwt.verify(token);
     if (!user) return { success: false, message: 'Invalid token' };
-
     return { success: true, user: user };
   })
 
   .post('/login', async ({ body, jwt, cookie: { userCookies } }) => {
 
-    const { username, password } = body;
+    const { email, password } = body;
     const result = await db`
-      SELECT * FROM users WHERE username = ${username}`;
+      SELECT * FROM users WHERE email = ${email}`;
 
     if (result.length === 0) {
       return { success: false, message: 'User not found' };
@@ -72,12 +111,8 @@ const app = new Elysia()
 
       return { success: false, message: 'Invalid password' };
     }
-    console.log('userId:', user.userid, "login success");
 
-    const token = await jwt.sign({
-      userid: user.userid,
-      username: user.username
-    });
+    const token = await jwt.sign({ userid: user.userid, email: user.email, username: user.username, profile: user.profile });
 
     userCookies.set({
       value: token,
@@ -86,13 +121,55 @@ const app = new Elysia()
       secure: false
     });
 
-    return { success: true, message: 'Login successful', userId: user.userid };
+    return { success: true, message: 'Login successful' };
   }, {
     body: t.Object({
-      username: t.String(),
+      email: t.String(),
       password: t.String()
     })
   })
+
+  .post('/signup', async ({ body }) => {
+
+    const { email, password, username } = body;
+
+    try {
+
+      const user = await db`
+      SELECT * FROM users WHERE email = ${email}`;
+
+      if (user.length === 0) {
+        const newpass = await bcrypt.hash(password, 10);
+
+        await db`
+      insert into users (username, password, email) values(${username},${newpass}, ${email})`;
+        return { success: true, message: 'signup success please login' };
+
+      } else {
+        return { success: false, message: 'This email already exists' };
+      }
+
+    } catch (error) {
+      return { success: false, message: error };
+    }
+
+
+  }, {
+    body: t.Object({
+      email: t.String(),
+      password: t.String(),
+      username: t.String()
+    })
+  })
+
+
+
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
 
   .post('/friendrequest', async ({ body }) => {
     const { userid, friendid } = body;
@@ -154,29 +231,72 @@ const app = new Elysia()
 
   .get('/getalltasks', async ({ query }) => {
     const userid = Number(query.userid);
-    console.log('call get all tasks from user:', userid)
-
+    const type = query.type;
+    let raw = [];
     try {
-      const raw = await db`
+
+      if (type === 'All') {
+        raw = await db`
       SELECT 
-        t.task_id, t.title,t.description,t.category, t.type_task AS type, t.start_time, t.end_time,d.detail_id, d.task_title, d.status AS detail_status, s.subtask, s.status AS subtask_status, s.subtask_id
+        t.task_id, t.title,t.description,t.category, t.type_task AS type,t.room_id,t.room_name,t.bookmark, t.start_time, t.end_time,d.detail_id, d.task_title, d.status AS detail_status, s.subtask, s.status AS subtask_status, s.subtask_id
       FROM tasks t
       JOIN task_details d ON t.task_id = d.task_id
       LEFT JOIN task_subtasks s ON d.detail_id = s.detail_id
       WHERE t.from_user_id = ${userid}
+      ORDER BY t.start_time, t.end_time asc;
+    `;
+    // ORDER BY t.task_id, d.detail_id, s.subtask_id asc;
+      }
+      else if (type === 'Mytask') {
+        raw = await db`
+      SELECT 
+        t.task_id, t.title,t.description,t.category, t.type_task AS type,t.room_id,t.room_name,t.bookmark, t.start_time, t.end_time,d.detail_id, d.task_title, d.status AS detail_status, s.subtask, s.status AS subtask_status, s.subtask_id
+      FROM tasks t
+      JOIN task_details d ON t.task_id = d.task_id
+      LEFT JOIN task_subtasks s ON d.detail_id = s.detail_id
+      WHERE t.from_user_id = ${userid} and t.type_task = 'mytask'
       ORDER BY t.task_id, d.detail_id, s.subtask_id asc;
     `;
+      } else if (type === 'Teamtask') {
+        raw = await db`
+      SELECT 
+        t.task_id, t.title,t.description,t.category, t.type_task AS type,t.room_id,t.room_name,t.bookmark, t.start_time, t.end_time,d.detail_id, d.task_title, d.status AS detail_status, s.subtask, s.status AS subtask_status, s.subtask_id
+      FROM tasks t
+      JOIN task_details d ON t.task_id = d.task_id
+      LEFT JOIN task_subtasks s ON d.detail_id = s.detail_id
+      WHERE t.from_user_id = ${userid} and t.type_task = 'teamtask'
+      ORDER BY t.task_id, d.detail_id, s.subtask_id asc;
+    `;
+      } else if (type === 'Deadline') {
+        raw = await db`
+      SELECT 
+      t.task_id, t.title,t.description,t.category, t.type_task AS type,t.room_id,t.room_name,t.bookmark, t.start_time, t.end_time,d.detail_id, d.task_title, d.status AS detail_status, s.subtask, s.status AS subtask_status, s.subtask_id
+      FROM tasks t
+      JOIN task_details d ON t.task_id = d.task_id
+      LEFT JOIN task_subtasks s ON d.detail_id = s.detail_id
+      WHERE t.from_user_id = ${userid}
+      ORDER BY t.end_time asc;
+    `;
+      }
+
+      else {
+        return {
+          success: true,
+          message: 'request success',
+          alltasks: []
+        };
+      }
 
       const taskMap = new Map();
 
       for (const row of raw) {
         const {
-          task_id, title, description, category, type, start_time, end_time, detail_id, task_title, detail_status, subtask, subtask_status, subtask_id
+          task_id, title, description, category, type, room_id, room_name, bookmark, start_time, end_time, detail_id, task_title, detail_status, subtask, subtask_status, subtask_id
         } = row;
 
         if (!taskMap.has(task_id)) {
           taskMap.set(task_id, {
-            task_id, title, description, category, type, start_time, end_time, detail: []
+            task_id, title, description, category, type, room_id, room_name, bookmark, start_time, end_time, detail: []
           });
         }
 
@@ -201,7 +321,7 @@ const app = new Elysia()
           }
         }
       }
-      // console.log('all task = ', Array.from(taskMap.values()))
+      // console.log('type = ', type)
 
       return {
         success: true,
@@ -209,9 +329,11 @@ const app = new Elysia()
         alltasks: Array.from(taskMap.values())
       };
 
+
     } catch (err) {
       return { success: false, message: 'request error', error: err };
     }
+
   })
 
 
@@ -252,21 +374,44 @@ const app = new Elysia()
 
   .get('/getalluser', async ({ query }) => {
     const userid = Number(query.userid);
+    const username = query.username;
+    let result;
 
-    const result = await db`
-    SELECT
-      u.userid,
-      u.username,
-      COALESCE(r.status, 'none') AS status
-    FROM users u
-    LEFT JOIN requests r
-      ON r.addressee_id = u.userid AND r.requester_id = ${userid}
-    WHERE u.userid != ${userid}
+    try {
+
+      if (username.trim() === '') {
+        result = await db`
+   SELECT u.userid, u.username, COALESCE(
+    CASE WHEN f.user_id IS NOT NULL THEN 'friend' ELSE r.status END,'none' ) AS status,u.profile
+   FROM users u
+   LEFT JOIN friends f
+     ON (f.user_id = ${userid} AND f.friend_id = u.userid) OR (f.friend_id = ${userid} AND f.user_id = u.userid)
+   LEFT JOIN requests r
+     ON r.requester_id = ${userid} AND r.addressee_id = u.userid
+   WHERE u.userid != ${userid}
   `;
+      } else {
+        result = await db`
+   SELECT u.userid, u.username, COALESCE(
+    CASE WHEN f.user_id IS NOT NULL THEN 'friend' ELSE r.status END,'none' ) AS status, u.profile
+   FROM users u
+   LEFT JOIN friends f
+     ON (f.user_id = ${userid} AND f.friend_id = u.userid) OR (f.friend_id = ${userid} AND f.user_id = u.userid)
+   LEFT JOIN requests r
+     ON r.requester_id = ${userid} AND r.addressee_id = u.userid
+   WHERE u.userid != ${userid} AND u.username ILIKE ${username + '%'}`;
+      }
 
-    return {
-      success: true, message: 'Fetched all users and statuses', allusers: result
-    };
+      return {
+        success: true, message: 'Fetched all users and statuses', allusers: result
+      };
+
+    } catch (error) {
+      console.error(error)
+      return {
+        success: false, message: 'alluser request error',
+      };
+    }
   })
 
   .get('/getallfriends', async ({ query }) => {
@@ -284,6 +429,18 @@ const app = new Elysia()
 
     return {
       success: true, message: 'Fetched all friend and statuses', allfriends: result
+    };
+  })
+
+  .get('/getallrooms', async ({ query }) => {
+    const userid = query.userid;
+
+    const result = await db`
+    SELECT * FROM rooms WHERE ${userid} = ANY (string_to_array(member_id, ','));`;
+    console.log('room= ', result)
+
+    return {
+      success: true, message: 'Fetched all rooms and statuses', allrooms: result
     };
   })
 
@@ -379,6 +536,60 @@ const app = new Elysia()
       message: 'update task successfully',
       task_id
     };
+  })
+
+  .post('/updatebookmark', async ({ body }: { body: { ismark: boolean, task_id: number } }) => {
+    const { ismark, task_id } = body;
+    await db`
+       update tasks
+       set bookmark = ${ismark}
+       where task_id = ${task_id}`;
+
+    return {
+      success: true,
+      message: 'update bookmark successfully',
+    };
+  })
+
+  .post('/updatetasksbyroomid', async ({ body }: { body: { userId: number, task_id: number, roomName: string } }) => {
+    const { userId, roomName, task_id } = body;
+    const struserId = String(userId);
+    const roomid = getroomId(userId, roomName)
+
+    try {
+
+      const room = await db`
+          select * from rooms
+          where roomid = ${roomid}`; ///RETURNING ใช้ได้กับคำสั่ง INSERT, UPDATE, หรือ DELETE เท่านั้น
+      let insert;
+
+      if (room.length === 0) {
+        insert = await db`
+          insert into rooms (roomid,roomname, creater_id, member_id) 
+          values (${roomid},${roomName}, ${userId}, ${struserId}) RETURNING *`;
+
+        await db`update tasks set room_id = ${roomid}  where task_id = ${task_id}`;
+        console.log("create room successful");
+
+        return {
+          success: true,
+          message: 'create successfully',
+          roomid: roomid
+        };
+
+      } else {
+        console.log("already has this room");
+      }
+
+
+    } catch (e) {
+      console.error(e, "create room unsuccessful");
+      return {
+        success: false,
+        message: 'update unsuccessful',
+      };
+
+    }
   })
 
   .post('/updatesubstatus', async ({ body }: { body: { main: { detail_id: number, tasks: string, status: string, subtasks: Array<{ subtask: string, status: string, subtask_id: number }> }, sub: { subtask: string, status: string, subtask_id: number }, task_id: number } }) => {
@@ -532,31 +743,7 @@ Bun.serve({
       const { type } = msg;
 
       if (type === "create_room") {
-        const { roomName, userId } = msg;
-        const struserId = String(userId);
 
-        try {
-          //get Array ของ Object ex [ {roomid: string,roomname: string}, ... ]
-          const room = await db`
-          select * from rooms
-          where roomid = getroomId(${userId},${roomName}) `;
-
-          if (room.length === 0) {
-            await db`
-          insert into rooms (roomid,roomname, creater_id, member_id) 
-          values (getroomId(${userId},${roomName}),${roomName}, ${userId}, ${struserId})`;
-          }
-
-          console.log("create room successful");
-
-        } catch (e) {
-          console.error(e, "create room unsuccessful");
-          // ws.send(JSON.stringify({
-          //   type: "create_room_response",
-          //   success: false,
-          //   message: "create room unsuccessful"
-          // }));
-        }
       }
 
       if (type === "invite") {
@@ -614,14 +801,12 @@ Bun.serve({
 
             for (const friendId of member) {
               const friendSocket = connections.get(friendId);
-              if (friendSocket) {
-                friendSocket.send(JSON.stringify({ type: 'room', userId: userId, message: message, room_id: insert[0].room_id, send_time: insert[0].send_time }));
+              if (friendSocket && friendId != userId) {
+                friendSocket.send(JSON.stringify({ type: 'room', roomchatid: insert[0].roomchatid, sender_id: userId, chatmessage: message, room_id: insert[0].room_id, send_time: insert[0].send_time }));
                 //เมื่อส่งข้อมูลผ่านเครือข่าย (เช่น ผ่าน WebSocket, HTTP, API) เราต้องแปลงข้อมูลให้เป็น string ก่อน เพราะ protocol พวกนี้รับส่งข้อมูลแบบข้อความ (text) ฝั่งรับสามารถแปลง string นี้กลับเป็น object โดยใช้ JSON.parse() เพื่อใช้งานต่อได้
               }
               else {
                 console.log('friend not online');
-                ws.send(JSON.stringify({ type: 'room', userId: userId, message: message, room_id: insert[0].room_id, send_time: insert[0].send_time }));
-                // await db`insert into chat_history (sender_id,room_id,chatmessage,typechat) values(${userId}, ${roomId},${message},'room')`;
               }
             }
           }
@@ -648,7 +833,7 @@ Bun.serve({
 
             const friendSocket = connections.get(`${friendId}`);
             if (friendSocket) {
-              friendSocket.send(JSON.stringify({ type: 'friend', sender_id: userId,receiver_id:friendId, chatmessage: message, send_time: insert[0].send_time }));
+              friendSocket.send(JSON.stringify({ type: 'friend', sender_id: userId, receiver_id: friendId, chatmessage: message, send_time: insert[0].send_time }));
 
             } else {
 
