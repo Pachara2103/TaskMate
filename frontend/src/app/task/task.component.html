@@ -1,146 +1,203 @@
 <div class="container">
-    <div style="width: 100px; height: 100px; background-color: #f1f1f1; position: absolute; top: 0; z-index: 100;">
-        <!-- HTML -->
-        <input type="file" (change)="onFileSelected($event)" accept="image/*">
-        <button (click)="uploadProfile()">Upload</button>
-
-
-    </div>
     <div class="content">
-
 
         <header class="header">
 
-            <div style="flex-direction: row; display: flex; justify-content: space-between; padding: 1rem;">
+            <div style="flex-direction: row; display: flex; justify-content: space-between; padding: 1rem;height: 4vh;">
                 <label style="font-size: 25px; font-weight: bold;">All Task</label>
-                <button>Add new task</button>
+                <div style="display: flex; flex-direction: row; justify-content: center;align-items: center;">
+
+                    <div
+                        style="width: 50px; height: 50px; justify-content: center; display: flex;align-items: center; cursor: pointer; ">
+                        <svg viewBox="0 0 24 24" width="80%" height="80%" class="plus" (click)="goToAddPage()">
+
+                            <path [attr.d]="getimg('plus')"></path>
+                        </svg>
+
+                    </div>
+
+                    <div>Add New</div>
+
+                </div>
             </div>
 
+
             <div
-                style="flex-direction: row; display: flex; justify-content: space-between; position: absolute; bottom: 0;">
+                style="flex-direction: row; display: flex; justify-content: space-between; position: absolute; bottom: 1px;">
                 <div class="tab">
                     <div *ngFor="let item of tab; let i = index" [ngClass]="tabfocus===item? 'tab-focus':'tab-nfocus'"
                         style="cursor: pointer;" (click)="chtabfocus(item)">{{item}}</div>
                 </div>
             </div>
 
+            <div style="position: absolute; bottom: 0; right: 0; width: 30%; padding: 5px; padding-right: 40px;">
+
+                <div style="position: relative;">
+                    <input type="text" placeholder="Search" (keyup.enter)="searchTask(searchtask)"
+                        [(ngModel)]="searchtask"
+                        style="width: 100%;height: 30px; border-radius: 5px; border: none; background-color: #e8e8e8; padding-left: 10px; outline: none; font-size: 14px;">
+
+                    <div
+                        style="position: absolute; left: -42px; top: 0;width: 40px; height: 33px; justify-content: center; align-items: center; display: flex;">
+                        <svg viewBox="-1 0 24 24" width="80%" height="80%" style="fill: #333;">
+                            <path [attr.d]="getimg('search')"></path>
+                        </svg>
+
+                    </div>
+
+
+                </div>
+            </div>
+
         </header>
 
-        <main class="list">
+        <main style="width: 97%; max-height: 72vh; align-items: center; padding-left: 16px; padding-bottom: 25px; 
+             display: flex;overflow-y: auto;  flex-direction: row; flex-wrap: wrap;">
 
-            <div *ngFor="let task of alltasks; let i = index; trackBy: trackByIndex" (click)="changeTask(task, i)"
-                [ngClass]="['box-container', boxIndex === i ? 'focus' : '']">
+            <div *ngFor="let task of alltasks; let i = index;">
 
+                <div [ngClass]="['box', boxIndex === i ? 'focus' : '']" (click)="changeTask(task, i)">
 
-                <div class="box">
-
-                    <div style="flex-direction: row; display: flex; padding: 15px; gap: 10px; flex-wrap: wrap; ">
-                        <div
-                            style=" width: 40px; height: 40px;border-radius: 15%;cursor: pointer;background-color: #27ca66;align-items: center; justify-content: center; display: flex; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4)">
-                            <svg viewBox="-1 0 24 24" width="70%" height="70%" style="fill: white;">
-                                <path [attr.d]="getimg('books')"></path>
-                            </svg>
+                    <section id="title task">
+                        <div *ngIf="task.type === 'team'"
+                            style="position: absolute; top: 0; right: 0; background-color: #63f6f3; padding: 2px;">
+                            Team
                         </div>
 
                         <div
-                            style="flex-direction: column; display: flex; justify-content: flex-start; background-color: #edbb5e;">
+                            style="flex-direction: row; display: flex; padding: 15px; gap: 10px; flex-wrap: wrap; margin-top: 5px; ">
 
-                            <div style=" font-size: 20px;">{{ task.title}}</div>
-                            <div style="font-size: 15px;"> {{ task.description}} </div>
-
-                        </div>
-                    </div>
-
-
-
-                    <div
-                        style="background-color: #90b9ff;height: 20px; width: 100%; position: relative;padding-left:15px; padding-right: 15px;
-                        flex-direction: column; display: flex; justify-content: flex-end; box-sizing: border-box; margin-top: 10px;">
-                        <label style="position: absolute; top:-15px; right: 15px;">{{getPercent(task.detail)[0]}}%
-                        </label>
-
-                        <canvas baseChart [data]="assignProgressChart(task.detail)" [type]="'bar'"
-                            [options]="progressChartOptions">
-                        </canvas>
-
-                    </div>
-
-                    <div style=" flex-direction: row; display: flex; justify-content: space-between;">
-
-                        <div style="flex-direction: row; display: flex; padding-left: 15px; padding-top: 10px;gap:6px">
-
-                            <div *ngFor="let i of getarraycategory(task.category)"
-                                style="padding: 2px; border-radius: 5px; font-size: 15px;"
-                                [ngStyle]="{'background-color': getcategoryColor(i)[0], 'color': getcategoryColor(i)[1]}">
-                                {{i}}
-                            </div>
-
-                        </div>
-
-                        <!-- <div style="flex-direction: row; display: flex;font-size: 15px; gap: 10x; ">
-
-                            <div style=" background-color: #edbb5e; padding: 2px; border-radius: 10px; color: #fff;">
-                                {{task.category}}
-                            </div>
-
-                        </div> -->
-
-
-                        <!-- <div
-                            style="width: 100%; height: 100%; background-color: #90b9ff; justify-content: center; align-items: center; display: flex;">
-                            <div *ngFor="let img of getArrayData(item,'member')"
-                                style="width: 25px; height: 100%; justify-content: center; display: flex; align-items: center; border-radius: 50%;">
-
-                                <img [src]="img" style="width: 100%; height: 100%;">
-
-                            </div>
-
-                        </div> -->
-
-                    </div>
-
-                    <div
-                        style="flex-direction: row; display: flex; justify-content: space-between; padding:10px ; z-index: 100;">
-                        <div style="font-size: 15px; border-radius: 10px;flex-direction: row;display: flex; gap: 5px;color: #fff;padding: 3px;"
-                            [ngStyle]="{'background-color': getDeadline(task.start_time, task.end_time)[1]}">
-                            <div style="width: 20px; height: 20px; align-items: center; display: flex;">
-                                <svg viewBox="0 0 24 24" width="100%" height="100%"
-                                    [ngStyle]="{'fill': getDeadline(task.start_time, task.end_time)[2]}">
-                                    <path [attr.d]="getimg('clock')"></path>
+                            <div [ngStyle]="{'background-color': iconColor.get(getarraycategory(task.category)[0])}"
+                                style=" width: 40px; height: 40px;border-radius: 15%;cursor: pointer;
+                               align-items: center; justify-content: center; display: flex; box-shadow: 0 5px 5px rgba(0, 0, 0, 0.4)">
+                                <svg viewBox="-1 0 24 24" width="70%" height="70%" style="fill: white;">
+                                    <path [attr.d]="getimg(getarraycategory(task.category)[0])"></path>
                                 </svg>
+                            </div>
+
+                            <div style="flex-direction: column; display: flex; justify-content: flex-start;">
+
+                                <div style=" font-size: 20px;">{{ task.title}}</div>
+                                <div style="font-size: 15px;"> {{ task.description}} </div>
+
+                            </div>
+                        </div>
+
+                    </section>
+
+                    <section id="percent">
+                        <div
+                            style="height: 20px; width: 100%; position: relative;padding-left:15px; padding-right: 15px;
+                        flex-direction: column; display: flex; justify-content: flex-end; box-sizing: border-box; margin-top: 20px;">
+                            <label style="position: absolute; top:-15px; right: 15px;">{{getPercent(task.detail)[0]}}%
+                            </label>
+
+                            <canvas baseChart [data]="assignProgressChart(task.detail)" [type]="'bar'"
+                                [options]="progressChartOptions">
+                            </canvas>
+
+                        </div>
+
+                    </section>
+
+
+                    <section id="category & member">
+                        <div
+                            style=" flex-direction: row; display: flex; justify-content: space-between; padding: 10px;">
+
+                            <div style="flex-direction: row; display: flex; gap:6px">
+
+                                <div *ngFor="let i of getarraycategory(task.category)"
+                                    style="padding: 2px; border-radius: 5px; font-size: 15px;"
+                                    [ngStyle]="{'background-color': tagColor.get(i)![0], 'color': tagColor.get(i)![1]}">
+                                    {{i}}
+                                </div>
 
                             </div>
 
-                            <div [ngStyle]="{'color': getDeadline(task.start_time, task.end_time)[2]}">
-                                {{getDeadline(task.start_time, task.end_time)[0]}}</div>
+                            <div *ngIf="task.type === 'team'"
+                                style="flex-direction: row; display: flex; justify-content: center; gap: 2px;">
+                                <div *ngFor="let member of getMember(task.room_id)">
+
+                                    <div
+                                        style="background-color: rgb(232, 232, 232); width: 20px; height: 20px; border-radius: 50%; align-items: center; justify-content: center; display: flex;">
+                                        <img [src]="'http://localhost:4000/uploads/' + member + '.png'"
+                                            style="width: 80%; height: 80%;">
+                                    </div>
+
+
+                                </div>
+                            </div>
+
+                            <div *ngIf="task.type === 'personal'"
+                                style="flex-direction: row; display: flex; max-width: 70px; justify-content: center;">
+
+                                <div
+                                    style="background-color: rgb(232, 232, 232); width: 20px; height: 20px; border-radius: 50%;">
+                                    <img [src]="'http://localhost:4000/uploads/' + userid + '.png'"
+                                        style="width: 100%; height: 100%;">
+                                </div>
+
+                            </div>
+
                         </div>
 
-                        <div style="flex-direction: row; display: flex; gap: 5px;">
+                    </section>
 
-                            <div *ngFor="let icon of icons" (click)="$event.stopPropagation()">
-                                <div style="width: 20px; height: 20px;background-color: #27ca66;"
-                                    (click)="icon[0]==='roomchat' ? roomchat(task.room_id, task.task_id, task.title):bookmark(task.bookmark, task.task_id)">
+                    <section id="deadline">
+
+                        <div
+                            style="flex-direction: row; display: flex; justify-content: space-between; padding: 10px; margin-top: 10px;">
+
+                            <div style="font-size: 15px; border-radius: 10px;flex-direction: row;display: flex; gap: 5px;color: #fff;padding: 3px;"
+                                [ngStyle]="{'background-color': getDeadline(task.start_time, task.end_time)[1]}">
+                                <div style="width: 20px; height: 20px; align-items: center; display: flex;">
                                     <svg viewBox="0 0 24 24" width="100%" height="100%"
-                                        [ngStyle]="{'fill': task.bookmark && icon[0]==='bookmark'? '#FFCC00': 'black'}">
-                                        <path [attr.d]="icon[1]"></path>
+                                        [ngStyle]="{'fill': getDeadline(task.start_time, task.end_time)[2]}">
+                                        <path [attr.d]="getimg('clock')"></path>
+                                    </svg>
+
+                                </div>
+
+                                <div [ngStyle]="{'color': getDeadline(task.start_time, task.end_time)[2]}">
+                                    {{getDeadline(task.start_time, task.end_time)[0]}}</div>
+                            </div>
+
+                            <div style="flex-direction: row; display: flex; gap: 5px;"
+                                (click)="$event.stopPropagation()">
+
+                                <div style="width: 20px; height: 20px;" (click)="bookmark(task.bookmark, task.task_id)">
+                                    <svg *ngIf="task.bookmark" viewBox="0 0 24 24" width="100%" height="100%"
+                                        style="fill: #FFCC00;">
+                                        <path [attr.d]="getimg('fullbookmark')"></path>
+                                    </svg>
+
+                                    <svg *ngIf="!task.bookmark" viewBox="0 0 24 24" width="100%" height="100%">
+                                        <path [attr.d]="getimg('nfullbookmark')"></path>
+                                    </svg>
+
+                                </div>
+
+                                <div style="width: 20px; height: 20px;"
+                                    (click)="roomchat(task.room_id, task.task_id, task.title)">
+                                    <svg viewBox="0 0 24 24" width="100%" height="100%" style="fill: #146ccb;">
+                                        <path [attr.d]="getimg('roomchat')"></path>
                                     </svg>
 
                                 </div>
 
 
-                            </div>
 
+
+
+                            </div>
 
 
                         </div>
 
 
-                    </div>
 
-                    <div *ngIf="!(task.room_id===null)">room name: {{task.room_id}}</div>
-
-
-
+                    </section>
 
                 </div>
 
@@ -148,15 +205,14 @@
             </div>
 
             <section id="room_warning">
-                <div *ngIf="room_task != null && noRoomTasks[room_task.task_id]" style="position: fixed; top: 0;right: 0; width: 100vw; height: 100vh;
-            background-color: rgba(0, 0, 0, 0.3); 
-            backdrop-filter: blur(1.5px); 
-            z-index: 1000; display: flex; justify-content: center; align-items: center;">
+                <div *ngIf="room_task != null && noRoomTasks[room_task.task_id]"
+                    style="position: fixed; top: 0;right: 0; width: 100vw; height: 100vh;background-color: rgba(0, 0, 0, 0.3); 
+                backdrop-filter: blur(1.5px); z-index: 1000; display: flex; justify-content: center; align-items: center;">
 
                     <div style="flex-direction: column;  display: flex;  justify-content: center; align-items: center;">
                         <div
                             style="background-color: #eb6f6f; padding: 20px; border-radius: 8px; color: white; box-shadow: 0 0 10px rgba(0,0,0,0.5); max-width: 16vw;">
-                            You don't have room for this task. Do you want to create room?
+                            You don't have room for this task. Do you want to create new room?
                             <div
                                 style="flex-direction: row; display: flex; justify-content: center; align-items: center; margin-top: 15px; gap: 10px;">
                                 <button (click)="cancel()">Cancel</button>
@@ -174,29 +230,41 @@
                 <div *ngIf="iscreateroom"
                     style="position: fixed; top: 0;right: 0; width: 100vw; height: 100vh;background-color: rgba(0, 0, 0, 0.3); backdrop-filter: blur(1.5px); z-index: 1000; display: flex; justify-content: center; align-items: center;">
 
-
                     <div
-                        style="background-color: rgba(255, 255, 255, 0.8);padding: 20px; border-radius: 8px; color: white; box-shadow: 0 0 10px rgba(0,0,0,0.5); max-width: 16vw;">
+                        style="background-color: rgba(255, 255, 255, 0.8);padding: 20px; border-radius: 8px; color: white; box-shadow: 0 0 10px rgba(0,0,0,0.5); max-width: 16vw; flex-direction: column; display: flex; gap: 10px;">
                         <input type="text"
-                            style="border:none; border-bottom: solid 2px #333; outline: none; width: 16vw; height: 40px; background-color: rgba(255, 255, 255, 0.5); font-size: 15px; border-radius: 5px;"
+                            style="border:none; outline: none; width: 16vw; height: 40px; background-color: rgba(255, 255, 255, 0.5); font-size: 15px; border-radius: 5px;"
                             placeholder="Room name" [(ngModel)]="room_name">
-                        <div
-                            style="flex-direction: row; display: flex; justify-content: center; align-items: center; margin-top: 15px; gap: 10px;">
-                            <button (click)="cancelroom()">Cancel</button>
-                            <button (click)=" submitroom()">Add</button>
+
+                        <input type="file" id="fileInput" accept="image/*" (change)="onFileSelected($event)"
+                            style="display: none;" />
+
+                        <div style="flex-direction: row; display: flex; justify-content: center; align-items: center; gap: 10px;">
+                            <label for="fileInput"
+                                [ngStyle]="{'background-image': imagePreview ? 'url(' + imagePreview + ')' : '','background-size': 'cover','background-position': 'center'}"
+                                style="width: 50px; height: 50px; background-color: #a1a1a1; border-radius: 50%; cursor: pointer; display: flex; overflow: hidden; justify-content: center; align-items: center;">
+                                <img src="images/icons/roomdefault.png" *ngIf="imagePreview===null"
+                                    style="width: 70%; height: 70%;">
+                            </label>
+
+                            <div style="color: #333;">Select room profile</div>
+
                         </div>
+
+
+
+                        <div
+                            style="flex-direction: row; display: flex; justify-content: center; align-items: center; margin-top: 5px; gap: 10px;">
+                            <button (click)="cancelroom()">Cancel</button>
+                            <button (click)="submitroom()">Add</button>
+                        </div>
+
                     </div>
 
 
                 </div>
 
             </section>
-
-
-
-
-
-
         </main>
 
     </div>
@@ -215,10 +283,7 @@
             </div>
         </section>
 
-
-
-        <div
-            style="justify-content: center; display: inline-flex; background-color: #edbb5e; font-size: 28px; font-weight: bold;">
+        <div style="justify-content: center; display: inline-flex; font-size: 28px; font-weight: bold;">
             {{showTask.title}}</div>
 
 
@@ -245,6 +310,30 @@
                     </svg>
                 </div>
                 <label style="font-size: 17px; color: #5f6064;">Assignee</label>
+
+                <div *ngIf="showTask.type === 'team'"
+                    style="flex-direction: row; display: flex; max-width: 70px; justify-content: center; margin-left: 24px;">
+                    <div *ngFor="let member of getMember(showTask.room_id)">
+
+                        <div
+                            style="background-color: rgb(255, 255, 255); width: 20px; height: 20px; border-radius: 50%;">
+                            <img [src]="'http://localhost:4000/uploads/' + member + '.png'"
+                                style="width: 100%; height: 100%;">
+                        </div>
+
+
+                    </div>
+                </div>
+
+                <div *ngIf="showTask.type === 'personal'"
+                    style="flex-direction: row; display: flex; max-width: 70px; justify-content: center;  margin-left: 24px">
+
+                    <div style="background-color: rgb(255, 255, 255); width: 20px; height: 20px; border-radius: 50%;">
+                        <img [src]="'http://localhost:4000/uploads/' + userid + '.png'"
+                            style="width: 100%; height: 100%;">
+                    </div>
+
+                </div>
 
             </div>
 
@@ -333,7 +422,7 @@
 
                     <div
                         style="margin-left: 20px; flex-direction: column; display: inline-flex; gap: 10px; padding-bottom: 10px; padding-top: 10px;">
-                        <div *ngFor="let sub of main.subtasks; let p = index; trackBy: trackByIndex" style="gap: 10px;">
+                        <div *ngFor="let sub of main.subtasks; let p = index;" style="gap: 10px;">
                             <div
                                 style="flex-direction: row;display: inline-flex; padding: 5px; background-color: #f8fafb; border:solid 1px #e6e5e8; border-radius: 5px; gap: 5px;">
                                 <div (click)="togglesubcheck(main,sub,showTask.task_id)"
@@ -361,19 +450,24 @@
         <section id="bottom">
             <div
                 style="position: absolute; bottom: 10px; right: 10px; flex-direction: row; display: flex; align-items: center; gap: 5px;">
-                <div class="bottomimg">
-                    <svg viewBox="0 0 24 24" width="100%" height="100%">
-                        <path [attr.d]="getimg('edit')"></path>
-                    </svg>
+                <div *ngIf='delete'
+                    style="background-color: rgba(0, 0, 0, 0.5); flex-direction: row; display: flex; gap: 5px; padding: 10px; border-radius: 10px;">
+
+                    <button style="border-radius: 5px; padding: 5px; background-color: #ff3838;cursor: pointer"
+                        (click)="deletetask()">delete</button>
+                    <button style="border-radius: 5px; padding: 5px;cursor: pointer"
+                        (click)="canceldelete()">cancel</button>
 
                 </div>
 
                 <div class="bottomimg">
-                    <svg viewBox="0 0 24 24" width="100%" height="100%">
+                    <svg viewBox="0 0 24 24" width="100%" height="100%" style="cursor: pointer;" (click)="senddelete()">
                         <path [attr.d]="getimg('bin')"></path>
                     </svg>
 
                 </div>
+
+
 
             </div>
 
@@ -403,35 +497,15 @@
         border-top-left-radius: 10px;
         border-bottom-left-radius: 10px;
         overflow: hidden;
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
 
     }
 
     #showtask.expand {
         margin: 15px;
-        gap: 5px;
+        gap: 12px;
         padding: 20px;
         width: 25vw;
-    }
-
-    .listtask {
-        flex-direction: column;
-        display: flex;
-        max-height: 55vh;
-        gap: 10px;
-        overflow-y: auto;
-    }
-
-    .listtask::-webkit-scrollbar {
-        width: 10px;
-    }
-
-    .listtask::-webkit-scrollbar-track {
-        background: #f1f1f1;
-    }
-
-    .listtask::-webkit-scrollbar-thumb {
-        background-color: #888;
-        border-radius: 10px;
     }
 
 
@@ -455,46 +529,34 @@
         height: 100vh;
         flex-direction: row;
         display: flex;
-        background-color: aliceblue;
+        background-color: #f5f6f8;
         position: relative;
 
         & .content {
             width: 100%;
-            height: 95.5%;
-            margin-top: 1rem;
-            margin-left: 1rem;
-            margin-bottom: 1rem;
-
+            height: 100%;
             flex-direction: column;
+            display: flex;
 
             & .header {
-                width: 100%;
+                width: 96%;
                 height: 17%;
                 background-color: #fff;
                 flex-direction: column;
                 display: flex;
                 border-radius: 10px;
                 position: relative;
+                margin: 16px;
+                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4)
             }
 
-            & .list {
-                width: 100%;
-                height: 82%;
-                height: 82%;
-                background-color: #f5f6f8;
-                flex-wrap: wrap;
-                /* ✅ ให้ล้นแล้วขึ้นบรรทัดใหม่ */
-                flex-direction: row;
-                display: flex;
-                overflow-y: auto;
-                padding-top: 10px;
-            }
+
         }
 
     }
 
     .tab {
-        width: 30vw;
+        width: 32vw;
         height: 30px;
         flex-direction: row;
         justify-content: space-between;
@@ -517,38 +579,28 @@
         border-bottom: solid 3px #fff;
     }
 
+
     .focus {
         transform: scale(1.05);
     }
 
-    .box-container {
-        background-color: #ff9898;
+    .box {
+        background-color: #ffffff;
         width: 17vw;
-        height: 35vh;
+        height: 30vh;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        position: relative;
+        cursor: pointer;
+        margin-top: 30px;
+        margin-right: 25px;
+
         flex-direction: column;
-        align-items: center;
         display: flex;
+        position: relative;
         transition: transform 0.3s ease;
-        margin: 10px;
-
-
-        & .box {
-            background-color: #ffffff;
-            width: 17vw;
-            height: 29vh;
-            border-radius: 10px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-            margin-top: 20px;
-            z-index: 1;
-            position: relative;
-            cursor: pointer;
-
-            flex-direction: column;
-            display: flex;
-            position: relative;
-
-        }
     }
+
 
     .bottomimg {
         height: 20px;
@@ -564,5 +616,36 @@
 
     ::-webkit-scrollbar {
         width: 0;
+    }
+
+    .listtask {
+        flex-direction: column;
+        display: flex;
+        max-height: 55vh;
+        gap: 10px;
+        overflow-y: auto;
+    }
+
+    .listtask::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    .listtask::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .listtask::-webkit-scrollbar-thumb {
+        background-color: #888;
+        border-radius: 10px;
+    }
+
+    .plus {
+        fill: rgb(71, 54, 227);
+    }
+
+    .plus:hover {
+        transform: scale(1.1);
+        fill: rgb(51, 29, 255);
+
     }
 </style>

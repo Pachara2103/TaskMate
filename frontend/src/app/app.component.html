@@ -3,22 +3,9 @@
   <nav *ngIf="nowPath!=='/'">
     <div class="navbar-container">
 
-      <div style=" flex-direction: row; display: flex; width: 100%; height: 13%;">
 
-        <div style="background-color: aquamarine; width: 42%; border-radius: 50%;">
-          <img [src]="'http://localhost:4000/uploads/' + userid + '.png'" style="width: 100%; height: 100%;">
-        </div>
-
-        <div style="background-color: beige; width: 58%; height: 100%; align-items: center;display: flex;">
-
-          <div style="flex-direction: column; display: flex; margin-left: 5px;">
-
-            <label>{{username}}</label>
-            <label style="font-size: 13px; color: rgb(179, 179, 179);">{{useremail}}</label>
-
-          </div>
-
-        </div>
+      <div style=" width: 100%;margin-top: 15px;">
+        <img src="images/logo.png" style="width: 100%; height: 100%;">
 
       </div>
 
@@ -52,7 +39,7 @@
       <div
         style="flex-direction: row; display: flex; justify-content: space-between;align-items: center; gap: 10px; position: relative;">
 
-        <div style="flex-direction: row; display: flex; gap: 10px;">
+        <div style="flex-direction: row; display: flex; gap: 10px; width: auto;">
           <div style="width: 40px; height: 40px; cursor: pointer;" (click)="toggleexpand()">
             <svg viewBox="0 0 24 24" width="100%" height="100%" style="fill: #1371b9;">
               <path [attr.d]="getimg('msg')"></path>
@@ -63,15 +50,21 @@
             style="font-size: 18px; font-weight: 600; justify-content: center; align-items: center; display: flex; flex-direction: row;">
             {{getChatName().data[0]}}
 
-            <div *ngIf="getChatName().isroom" style="margin-left: 20px;font-size: 16px; color: #ce3a3a;padding-top: 3px;">
+            <div *ngIf="getChatName().isroom && !ismsg"
+              style="margin-left: 20px;font-size: 16px; color: #ce3a3a;padding-top: 3px;">
               {{getChatName().data[1]}}
             </div>
           </div>
         </div>
 
         <div style="flex-direction: row; display: flex;">
+          <div class="invitefriend" (click)="sendinvite()">
+            <img src="images/icons/adduser.png" style="width: 100%; height: 100%;">
+          </div>
+
           <button *ngIf="!ismsg" (click)="toggleexpand()" class="hidebutton">−</button>
           <button *ngIf="!ismsg" (click)="deletechat()" class="deletebutton">x</button>
+
         </div>
 
 
@@ -81,88 +74,138 @@
     </section>
 
     <section id="chat message" *ngIf="!ismsg">
-      <div #chatmsg
-        style="width: 100%; height: 39vh; background-color: #fff; flex-direction: column; display: flex;overflow-y: auto;">
+      <div *ngIf="!invite" #chatmsg
+        style="width: 100%; height: 39vh; background-color: #fff; flex-direction: column; display: flex;overflow-y: auto; border-radius: 10px;">
 
-        <div *ngIf="getChat().type==='friend' ">
+        <section id="friend chat">
 
-          <div *ngFor="let chat of friendchatList">
+          <div *ngIf="getChat().type==='friend'">
+            <div *ngFor="let chat of friendchatList">
 
-            <div *ngIf="isyourself(chat.sender_id)"
-              style="flex-direction: row; display: flex; align-items: center; margin-right: 5px;">
+              <div *ngIf="isyourself(chat.sender_id)"
+                style="flex-direction: row; display: flex; align-items: center; margin-right: 5px;">
 
-              <div class="chat-right">
-                {{ chat.chatmessage }}
-                <div style=" font-size: 12px; position: absolute; bottom: 0; left: -33px;">
-                  {{getTime(chat.send_time)}}
-                </div>
-              </div>
-
-            </div>
-
-            <div *ngIf="!isyourself(chat.sender_id)"
-              style="flex-direction: row; display: inline-flex; align-items: center; padding-left: 5px;">
-              <div
-                style="width: 38px; height: 38px; background-color: #27ca66; border-radius: 50%; margin-bottom: 10px;">
-
-              </div>
-
-              <div class="chat-left">
-                <div style="text-align: start; display: flex;">
+                <div class="chat-right">
                   {{ chat.chatmessage }}
-
-                </div>
-                <div style=" font-size: 12px; position: absolute; bottom: 0; right: -30px;"> {{getTime(chat.send_time)}}
+                  <div style=" font-size: 12px; position: absolute; bottom: 0; left: -33px;">
+                    {{getTime(chat.send_time)}}
+                  </div>
                 </div>
 
               </div>
+
+              <div *ngIf="!isyourself(chat.sender_id)"
+                style="flex-direction: row; display: inline-flex; align-items: center; padding-left: 5px;">
+                <div
+                  style="width: 38px; height: 38px; background-color: #27ca66; border-radius: 50%; margin-bottom: 10px;">
+
+                </div>
+
+                <div class="chat-left">
+                  <div style="text-align: start; display: flex;">
+                    {{ chat.chatmessage }}
+
+                  </div>
+                  <div style=" font-size: 12px; position: absolute; bottom: 0; right: -30px;">
+                    {{getTime(chat.send_time)}}
+                  </div>
+
+                </div>
+              </div>
+
             </div>
+
 
           </div>
 
+        </section>
 
-        </div>
+        <section id="room chat">
+          <div *ngIf="getChat().type==='room'">
 
-        <div *ngIf="getChat().type==='room' ">
+            <div *ngFor="let chat of roomchatList">
 
-          <div *ngFor="let chat of roomchatList">
+              <div *ngIf="isyourself(chat.sender_id)"
+                style="flex-direction: row; display: flex; align-items: center; margin-right: 5px;">
 
-            <div *ngIf="isyourself(chat.sender_id)"
-              style="flex-direction: row; display: flex; align-items: center; margin-right: 5px;">
-
-              <div class="chat-right">
-                {{ chat.chatmessage }}
-                <div style=" font-size: 12px; position: absolute; bottom: 0; left: -33px;">
-                  {{getTime(chat.send_time)}}
-                </div>
-              </div>
-
-            </div>
-
-            <div *ngIf="!isyourself(chat.sender_id)"
-              style="flex-direction: row; display: inline-flex; align-items: center; padding-left: 5px;">
-              <div
-                style="width: 38px; height: 38px; background-color: #27ca66; border-radius: 50%; margin-bottom: 10px;">
-
-              </div>
-
-              <div class="chat-left">
-                <div style="text-align: start; display: flex;">
+                <div class="chat-right">
                   {{ chat.chatmessage }}
-
-                </div>
-                <div style=" font-size: 12px; position: absolute; bottom: 0; right: -30px;"> {{getTime(chat.send_time)}}
+                  <div style=" font-size: 12px; position: absolute; bottom: 0; left: -33px;">
+                    {{getTime(chat.send_time)}}
+                  </div>
                 </div>
 
               </div>
+
+              <div *ngIf="!isyourself(chat.sender_id)"
+                style="flex-direction: row; display: inline-flex; align-items: center; padding-left: 5px;">
+                <div
+                  style="width: 38px; height: 38px; background-color: #27ca66; border-radius: 50%; margin-bottom: 10px;">
+
+                </div>
+
+                <div class="chat-left">
+                  <div style="text-align: start; display: flex;">
+                    {{ chat.chatmessage }}
+
+                  </div>
+                  <div style=" font-size: 12px; position: absolute; bottom: 0; right: -30px;">
+                    {{getTime(chat.send_time)}}
+                  </div>
+
+                </div>
+              </div>
+
             </div>
+
 
           </div>
 
+        </section>
+
+
+      </div>
+
+      <div *ngIf="invite"
+        style="width: 100%; height: 39vh; background-color: #ffffff; flex-direction: column; display: flex;overflow-y: auto;position: relative;">
+        <button style="position: absolute; left: 0; padding: 3px;" (click)="backinvite()">Back</button>
+
+
+        <div *ngFor="let i of allfriends">
+
+          <div
+            style=" height: 40px; background-color: #d3d3d3; flex-direction: row; display: flex; padding: 10px; align-items: center; gap: 30px; justify-content: center;">
+
+            <div style="flex-direction: row;display: flex;gap: 10px; align-items: center;">
+              <div
+                style=" background-color: #f2f2f2; width: 45px; height: 45px; border-radius: 50%; align-items: center; justify-content: center; display: flex;">
+                <img [src]="'http://localhost:4000/uploads/' + i.profile + '.png'" style="width: 70%; height: 70%;">
+              </div>
+
+              <div>{{i.friend_name}}</div>
+
+            </div>
+
+
+            <div *ngIf="inroom(i.friend_id)">
+              <div
+                style="background-color: #2ec029; padding: 5px; border-radius: 5px; box-shadow: 0px 6px 10px  rgba(60, 143, 65, 0.5);">
+                Joined</div>
+            </div>
+
+            <div *ngIf="!inroom(i.friend_id)">
+              <div
+                style="background-color: #51a7ed; padding: 5px; cursor: pointer;border-radius: 5px; box-shadow: 0px 6px 10px  rgba(79, 129, 196, 0.5);">
+                Add</div>
+            </div>
+
+
+
+
+
+          </div>
 
         </div>
-
-
 
 
       </div>
@@ -171,8 +214,7 @@
     </section>
 
     <section id="send message" *ngIf="!ismsg">
-      <div
-        style="flex-direction: row; display: flex;align-items: center; position: relative; background-color: #d06800;">
+      <div style="flex-direction: row; display: flex;align-items: center; position: relative;">
         <input type="text" placeholder="type a message" [(ngModel)]="chatMessage"
           (keyup.enter)="sendMessage(chatMessage)">
 
@@ -311,6 +353,17 @@
     display: flex;
   }
 
+  .invitefriend {
+    width: 20px;
+    height: 20px;
+    margin-top: 5px;
+    cursor: pointer;
+  }
+
+  .invitefriend :hover {
+    background-color: #aad6fb;
+  }
+
   .hidebutton {
     border: none;
     background-color: #90caf9;
@@ -336,5 +389,20 @@
     /* transform: scale(1.2); */
     background-color: #aad6fb;
     /* color: red; */
+  }
+
+  ::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 10px;
+
   }
 </style>

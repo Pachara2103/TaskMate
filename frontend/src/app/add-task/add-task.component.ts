@@ -1,7 +1,7 @@
-import { NgClass, NgFor, NgIf, NgStyle } from '@angular/common';
+import { NgFor, NgIf, NgStyle } from '@angular/common';
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -19,6 +19,7 @@ import { UserService } from '../services/user.service';
 export class AddTaskComponent {
   constructor(
     private userService: UserService,
+    private router: ActivatedRoute
 
   ) { }
   async ngOnInit() {
@@ -28,19 +29,13 @@ export class AddTaskComponent {
       this.userService.user = user;
     }
   }
-
-  titleName = '';
-  description = '';
-  startDate: Date = new Date();
-  endDate: Date = new Date();
+  edit = false;
 
   checkEmpty(x: string[], i: number) {
     console.log(x.length, "index=", i);
     return x.length === 0;
   }
 
-  detailList: Array<string> = [''];
-  subdetailList: Array<Array<string>> = [[]];
   imgsrc: Map<string, string> = new Map([
     ['plus',
       "M19,0H5C2.243,0,0,2.243,0,5v14c0,2.757,2.243,5,5,5h14c2.757,0,5-2.243,5-5V5c0-2.757-2.243-5-5-5Zm-3,13h-3v3c0,.553-.448,1-1,1s-1-.447-1-1v-3h-3c-.552,0-1-.447-1-1s.448-1,1-1h3v-3c0-.553,.448-1,1-1s1,.447,1,1v3h3c.552,0,1,.447,1,1s-.448,1-1,1Z"
@@ -93,12 +88,14 @@ export class AddTaskComponent {
     }
   }
 
-  tag: Array<string> = [];
-  tags = ['Work', 'Homework', 'coding']
+
+  tags = ['Work', 'Homework', 'Coding', 'Planning','Design','Exercise','Cooking']
+
   selectTag = false;
   selectTagToggle() {
     this.selectTag = !this.selectTag;
   }
+
   tagFocus: number = -1;
   changeTag(i: number) {
     this.tagFocus = i
@@ -117,6 +114,13 @@ export class AddTaskComponent {
     this.tag.splice(i, 1);
   }
 
+
+  get tagColor() {
+    return this.userService.tagColor;
+  }
+
+  ////////////////////////scroll bottom ///////////////////////////
+
   @ViewChild('midBox') midBox!: ElementRef;
 
   ngAfterViewChecked(): void {
@@ -130,7 +134,17 @@ export class AddTaskComponent {
       console.error('Scroll error:', err);
     }
   }
+  //////////////////////////// add task /////////////////////////
 
+
+  titleName = '';
+  description = '';
+  startDate: Date = new Date();
+  endDate: Date = new Date();
+  detailList: Array<string> = [''];
+  subdetailList: Array<Array<string>> = [[]];
+  type = 'personal';
+  tag: Array<string> = [];
 
   addtask() {
     console.log('detail= ', this.detailList)
@@ -140,7 +154,7 @@ export class AddTaskComponent {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ userid: this.userService.user?.userid, title: this.titleName, description: this.description, category: this.tag.join(','), start_time: this.startDate, end_time: this.endDate, type_task: 'mytask', main_task: this.detailList, sub_task: this.subdetailList })
+      body: JSON.stringify({ userid: this.userService.user?.userid, title: this.titleName, description: this.description, category: this.tag.join(','), start_time: this.startDate, end_time: this.endDate, type_task: this.type, main_task: this.detailList, sub_task: this.subdetailList })
     })
       .then(res => res.json())
       .then(data => {

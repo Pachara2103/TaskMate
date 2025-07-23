@@ -3,7 +3,7 @@ import { UserService } from '../services/user.service';
 import { NgFor, NgIf, NgStyle } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, isEmpty } from 'rxjs';
 
 
 @Component({
@@ -19,14 +19,15 @@ export class ChatComponent {
     private router: Router,
 
   ) { }
-  alluser: Array<{ userid: number; username: string; status: string, profile:string}> = [];
+  alluser: Array<{ userid: number; username: string; status: string, profile: string }> = [];
   allrequest: Array<{ from_user: number, from_username: string, status: string, to_user: number, to_username: string }> = [];
-  allfriends: Array<{ friend_id: number, friend_name: string }> = [];
 
   get allrooms() {
     return this.userService.allrooms;
   }
-
+  get allfriends(){
+    return this.userService.allfriends;
+  }
 
   imgsrc: Map<string, string> = new Map([
     ['left',
@@ -47,9 +48,10 @@ export class ChatComponent {
   getimg(x: string) {
     return this.imgsrc.get(x);
   }
-  trackByIndex(index: number, item: any): number {
-    return index;
+  isEmpty(x:any){
+    return x.length ===0;
   }
+  
 
 
   async ngOnInit() {
@@ -149,7 +151,7 @@ export class ChatComponent {
       const data = await res.json();
 
       if (data.success) {
-        this.allfriends = data.allfriends;
+        this.userService.allfriends = data.allfriends;
         console.log('allfriends = ', this.allfriends);
       } else {
         alert(data.message);
@@ -159,27 +161,6 @@ export class ChatComponent {
     }
   }
 
-  // async getRoom() {
-  //   try {
-  //     const res = await fetch(`http://localhost:4000/getallrooms?userid=${this.userService.userId}&type=${this.chatfocus}`, {
-  //       method: 'GET',
-  //       headers: {
-  //         'Content-Type': 'application/json'
-  //       }
-  //     });
-
-  //     const data = await res.json();
-
-  //     if (data.success) {
-  //       this.allrooms = data.allrooms;
-  //       console.log('all rooms = ', this.allrooms);
-  //     } else {
-  //       alert(data.message);
-  //     }
-  //   } catch (err) {
-  //     console.error('❌ Error:', err);
-  //   }
-  // }
 
   responseRequest(request: { from_user: number, from_username: string, status: string, to_user: number, to_username: string }, type: string) {
     console.log(request, 'type= ', type)
@@ -208,12 +189,25 @@ export class ChatComponent {
 
   //////////////////////////// for message ///////////////////////////////
 
-
-  async changeChat(x: any, type: string) {
-    return await this.userService.changeChat(x, type)
+  // chatFocus: Array<string | number> = ['',''];
+  get chatFocus() {
+    return this.userService.chatFocus;
   }
 
-  chatlist = ['All', 'Friend', 'Team']
+  async changeChat(x: any, type: string) {
+    await this.userService.changeChat(x, type)
+    this.userService.chatFocus[0] = (this.userService.chat_now!.type);
+    if (this.userService.chat_now?.type === 'friend') {
+      this.userService.chatFocus[1] = (this.userService.friend_chat!.friend_id);
+    }
+    if (this.userService.chat_now?.type === 'room') {
+      this.userService.chatFocus[1] = (this.userService.room_chat!.roomid);
+    }
+
+    return
+  }
+
+  chatlist = ['All', 'Friend', 'Room']
   chatfocus = 'All';
   chchatfocus(i: string) {
     this.chatfocus = i;
@@ -223,6 +217,10 @@ export class ChatComponent {
   tabFocus = '';
   changeTab(value: string) {
     this.tabFocus = value;
+    if (!this.ischat) {
+      this.ischat = true;
+      this.showchat();
+    }
   }
 
 
@@ -247,11 +245,14 @@ export class ChatComponent {
   toggleexpand() {
     this.ischat = !this.ischat;
     if (this.ischat) {
+      this.tabFocus = 'chatroom'
       this.showchat();
     } else {
+      this.tabFocus = ''
       this.closechat()
     }
-    console.log('ischat= ', this.ischat)
+
+
   }
 
 

@@ -5,6 +5,7 @@ import { ChartOptions, ChartType, ChartData } from 'chart.js';
 import { provideCharts, BaseChartDirective } from 'ng2-charts';
 import { ChatComponent } from '../chat/chat.component';
 import { UserService } from '../services/user.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-task',
@@ -28,6 +29,8 @@ export class TaskComponent {
   }
   constructor(
     private userService: UserService,
+    private router: Router
+
 
   ) { }
 
@@ -35,11 +38,8 @@ export class TaskComponent {
     return this.imgsrc.get(x);
   }
 
-  trackByIndex(index: number, item: any): number {
-    return index;
-  }
   imgsrc: Map<string, string> = new Map([
-    ['books',
+    ['Work',
       "m23.121.879c-1.17-1.17-3.072-1.17-4.242 0l-6.707 6.707c-.756.755-1.172 1.76-1.172 2.828v1.586c0 .552.447 1 1 1h1.586c1.068 0 2.073-.417 2.828-1.172l6.707-6.707c1.164-1.117 1.164-3.126 0-4.243zm-1.414 2.828-6.707 6.707c-.378.378-.88.586-1.414.586h-.586v-.586c0-.526.214-1.042.586-1.414l6.707-6.707c.391-.39 1.023-.39 1.414 0 .388.372.388 1.042 0 1.414zm-9.707 14.293c-.553 0-1-.447-1-1s.447-1 1-1h3c.553 0 1 .447 1 1s-.447 1-1 1zm8-4v5c0 2.757-2.243 5-5 5h-10c-2.757 0-5-2.243-5-5v-14c0-2.757 2.243-5 5-5h9c.553 0 1 .448 1 1s-.447 1-1 1h-9c-1.654 0-3 1.346-3 3v14c0 1.654 1.346 3 3 3h10c1.654 0 3-1.346 3-3v-5c0-.553.447-1 1-1s1 .447 1 1zm-10.833-2.333-1.687 1.687c-.431.431-.995.648-1.561.648-.533 0-1.066-.193-1.491-.582l-.669-.579c-.417-.362-.462-.994-.101-1.411.363-.419.994-.461 1.411-.101l.689.598c.103.093.228.092.307.013l1.687-1.687c.391-.391 1.023-.391 1.414 0s.391 1.023 0 1.414zm0-4.96-1.687 1.687c-.431.431-.995.648-1.561.648-.533 0-1.066-.193-1.491-.582l-.669-.579c-.417-.362-.462-.994-.101-1.411.363-.418.994-.461 1.411-.101l.689.598c.103.094.228.092.307.013l1.687-1.687c.391-.391 1.023-.391 1.414 0s.391 1.023 0 1.414zm0 8.546c.391.391.391 1.023 0 1.414l-1.687 1.687c-.431.431-.995.648-1.561.648-.533 0-1.066-.193-1.491-.582l-.669-.579c-.417-.362-.462-.993-.101-1.411.363-.417.994-.462 1.411-.101l.689.598c.103.093.228.092.307.013l1.687-1.687c.391-.391 1.023-.391 1.414 0z"
     ],
     ['clock',
@@ -73,8 +73,57 @@ export class TaskComponent {
     ],
     ['user',
       "m7.5,13c2.481,0,4.5-2.019,4.5-4.5s-2.019-4.5-4.5-4.5-4.5,2.019-4.5,4.5,2.019,4.5,4.5,4.5Zm0-8c1.93,0,3.5,1.57,3.5,3.5s-1.57,3.5-3.5,3.5-3.5-1.57-3.5-3.5,1.57-3.5,3.5-3.5Zm7.5,17.5v1c0,.276-.224.5-.5.5s-.5-.224-.5-.5v-1c0-3.584-2.916-6.5-6.5-6.5s-6.5,2.916-6.5,6.5v1c0,.276-.224.5-.5.5s-.5-.224-.5-.5v-1c0-4.136,3.364-7.5,7.5-7.5s7.5,3.364,7.5,7.5Zm9-4.637v.637c0,.276-.224.5-.5.5s-.5-.224-.5-.5v-.637c0-3.233-2.63-5.863-5.863-5.863-1.357,0-2.485.307-3.351.91-.228.158-.539.103-.696-.124s-.103-.538.124-.696c1.037-.724,2.357-1.09,3.923-1.09,3.784,0,6.863,3.079,6.863,6.863Zm-6.5-8.863c2.481,0,4.5-2.019,4.5-4.5S19.981,0,17.5,0s-4.5,2.019-4.5,4.5,2.019,4.5,4.5,4.5Zm0-8c1.93,0,3.5,1.57,3.5,3.5s-1.57,3.5-3.5,3.5-3.5-1.57-3.5-3.5,1.57-3.5,3.5-3.5Z"
+    ], ['search',
+      "M23.707,22.293l-5.969-5.969a10.016,10.016,0,1,0-1.414,1.414l5.969,5.969a1,1,0,0,0,1.414-1.414ZM10,18a8,8,0,1,1,8-8A8.009,8.009,0,0,1,10,18Z"
+
+    ],
+    ['plus',
+      "M19,0H5C2.243,0,0,2.243,0,5v14c0,2.757,2.243,5,5,5h14c2.757,0,5-2.243,5-5V5c0-2.757-2.243-5-5-5Zm-3,13h-3v3c0,.553-.448,1-1,1s-1-.447-1-1v-3h-3c-.552,0-1-.447-1-1s.448-1,1-1h3v-3c0-.553,.448-1,1-1s1,.447,1,1v3h3c.552,0,1,.447,1,1s-.448,1-1,1Z"]
+    ,
+    ['fullbookmark',
+      "M2.849,23.55a2.954,2.954,0,0,0,3.266-.644L12,17.053l5.885,5.853a2.956,2.956,0,0,0,2.1.881,3.05,3.05,0,0,0,1.17-.237A2.953,2.953,0,0,0,23,20.779V5a5.006,5.006,0,0,0-5-5H6A5.006,5.006,0,0,0,1,5V20.779A2.953,2.953,0,0,0,2.849,23.55Z"
+    ],
+    ['nfullbookmark',
+      "M18.57,0H5.577C3.096,0,1.077,2.019,1.077,4.5V20.985c0,1.203,.859,2.482,1.915,2.851,.309,.108,.627,.161,.94,.161,.734,0,1.448-.288,1.99-.831l6.151-6.119,6.08,6.048c.807,.804,1.982,1.098,2.997,.743,1.167-.406,1.92-1.461,1.92-2.688V4.5c0-2.481-2.019-4.5-4.5-4.5Zm3.5,21.15c0,.807-.479,1.476-1.249,1.743-.655,.229-1.424,.027-1.963-.508l-6.433-6.398c-.195-.193-.51-.193-.705,0l-6.504,6.471c-.508,.508-1.215,.67-1.895,.435-.651-.228-1.244-1.137-1.244-1.907V4.5c0-1.93,1.57-3.5,3.5-3.5h12.993c1.93,0,3.5,1.57,3.5,3.5V21.15Z"
+    ],
+
+    ['roomchat',
+      "m7.5 13a4.5 4.5 0 1 1 4.5-4.5 4.505 4.505 0 0 1 -4.5 4.5zm7.5 7a5.006 5.006 0 0 0 -5-5h-5a5.006 5.006 0 0 0 -5 5v4h15zm2.5-11a4.5 4.5 0 1 1 4.5-4.5 4.505 4.505 0 0 1 -4.5 4.5zm1.5 2h-5a4.793 4.793 0 0 0 -.524.053 6.514 6.514 0 0 1 -1.576 2.216 7.008 7.008 0 0 1 5.1 6.731h7v-4a5.006 5.006 0 0 0 -5-5z"
+    ],
+
+    ['Homework',
+      "m11 16v-3.759c0-.317-.213-.6-.518-.687l-1.569-.448c-.924-.293-1.939.475-1.913 1.442v3.469c0 .698.469 1.319 1.14 1.511l2.22.634c.531.152.839.705.687 1.236-.15.536-.719.838-1.236.688l-2.22-.634c-1.525-.437-2.591-1.849-2.591-3.435v-3.469c-.064-2.257 2.31-4.046 4.462-3.365l1.569.448c.362.103.689.279.969.508.279-.229.607-.404.968-.508l1.57-.448c1.26-.361 2.604.008 3.506.961.38.401.363 1.034-.039 1.414-.4.38-1.033.364-1.414-.039-.388-.41-.964-.569-1.504-.414l-1.57.448c-.305.087-.518.37-.518.687v3.759c0 .553-.448 1-1 1s-1-.447-1-1zm12.121 1.121-5.707 5.707c-.755.756-1.76 1.172-2.828 1.172h-1.586c-.552 0-1-.447-1-1v-1.586c0-1.068.417-2.073 1.172-2.828l5.707-5.707c1.133-1.134 3.109-1.134 4.243 0 1.169 1.17 1.169 3.072 0 4.242zm-1.414-2.828c-.378-.379-1.037-.379-1.414 0l-5.708 5.707c-.378.378-.586.88-.586 1.414v.586h.586c.526 0 1.042-.214 1.414-.586l5.707-5.707c.39-.39.39-1.024 0-1.414zm-12.707 7.707h-4c-1.654 0-3-1.346-3-3v-8.516c0-.928.419-1.789 1.15-2.362l7-5.484c1.089-.854 2.611-.853 3.7 0l7 5.485c.416.325.739.757.936 1.248.205.513.789.762 1.3.558.513-.205.763-.787.558-1.3-.327-.818-.867-1.538-1.56-2.081l-7.001-5.484c-1.815-1.422-4.352-1.422-6.167 0l-6.999 5.484c-1.218.954-1.917 2.389-1.917 3.936v8.516c0 2.757 2.243 5 5 5h4c.552 0 1-.447 1-1s-.448-1-1-1z"
+    ],
+    ['Coding',
+      "m3 5.5c0-.828.672-1.5 1.5-1.5s1.5.672 1.5 1.5-.672 1.5-1.5 1.5-1.5-.672-1.5-1.5zm5.5 1.5c.828 0 1.5-.672 1.5-1.5s-.672-1.5-1.5-1.5-1.5.672-1.5 1.5.672 1.5 1.5 1.5zm15.5-1v12c0 2.757-2.243 5-5 5h-14c-2.757 0-5-2.243-5-5v-12c0-2.757 2.243-5 5-5h14c2.757 0 5 2.243 5 5zm-22 0v2h20v-2c0-1.654-1.346-3-3-3h-14c-1.654 0-3 1.346-3 3zm20 12v-8h-20v8c0 1.654 1.346 3 3 3h14c1.654 0 3-1.346 3-3zm-11.793-4.793c.391-.391.391-1.023 0-1.414s-1.023-.391-1.414 0l-2.181 2.181c-.872.872-.872 2.29.019 3.18l2.181 2.071c.399.381 1.033.365 1.413-.036.381-.4.364-1.033-.036-1.413l-2.162-2.054c-.092-.092-.092-.242 0-.334l2.181-2.181zm5-1.414c-.391-.391-1.023-.391-1.414 0s-.391 1.023 0 1.414l2.181 2.181c.092.092.092.242.011.323l-2.159 2.093c-.396.384-.406 1.018-.021 1.414.385.397 1.018.406 1.414.021l2.17-2.104c.872-.872.872-2.29 0-3.162l-2.181-2.181z"
+
+    ],
+    ['Planing',
+      "M19,0H5C2.243,0,0,2.243,0,5v14c0,2.757,2.243,5,5,5h14c2.757,0,5-2.243,5-5V5c0-2.757-2.243-5-5-5Zm3,19c0,1.654-1.346,3-3,3H5c-1.654,0-3-1.346-3-3V5c0-.352,.072-.686,.184-1H21.816c.112,.314,.184,.648,.184,1v14ZM4,8c0-.552,.447-1,1-1h3c.553,0,1,.448,1,1s-.447,1-1,1h-3c-.553,0-1-.448-1-1Zm10,5c0,.553-.447,1-1,1H7c-.553,0-1-.447-1-1s.447-1,1-1h6c.553,0,1,.448,1,1Zm0,5c0,.553-.447,1-1,1H5c-.553,0-1-.447-1-1s.447-1,1-1H13c.553,0,1,.447,1,1Zm6,0c0,1.105-.895,2-2,2s-2-.895-2-2c0-.738,.405-1.376,1-1.723v-6.277c0-.551-.448-1-1-1h-1.277c-.346,.595-.984,1-1.723,1-1.105,0-2-.895-2-2s.895-2,2-2c.738,0,1.376,.405,1.723,1h1.277c1.654,0,3,1.346,3,3v6.277c.595,.346,1,.984,1,1.723Z"
+    ],
+    ['Design',
+      "m6 18h12c.552 0 1 .448 1 1s-.448 1-1 1h-12c-.552 0-1-.448-1-1s.448-1 1-1zm1.493-3.804c-.314.88.336 1.804 1.271 1.804h3.236c1.747 0 3.146-1.493 2.988-3.274s-1.944-2.997-3.699-2.66c-2.087.402-3.226 2.535-3.795 4.13zm-4.493-7.696c0 .828.672 1.5 1.5 1.5s1.5-.672 1.5-1.5-.672-1.5-1.5-1.5-1.5.672-1.5 1.5zm5.5-1.5c-.828 0-1.5.672-1.5 1.5s.672 1.5 1.5 1.5 1.5-.672 1.5-1.5-.672-1.5-1.5-1.5zm14.5 3c-.552 0-1 .448-1 1v10c0 1.654-1.346 3-3 3h-14c-1.654 0-3-1.346-3-3v-8h4c.552 0 1-.448 1-1s-.448-1-1-1h-4v-2c0-1.654 1.346-3 3-3h8c.552 0 1-.448 1-1s-.448-1-1-1h-8c-2.757 0-5 2.243-5 5v12c0 2.757 2.243 5 5 5h14c2.757 0 5-2.243 5-5v-10c0-.552-.448-1-1-1zm-9.657.688c.413.368 1.044.331 1.412-.083l1.404-1.578c1.523-1.714 4.072-4.582 4.232-4.752.362-.362.973-.36 1.332 0 .368.369.369.968.002 1.336l-5.775 5.775c-.391.391-.391 1.023 0 1.414s1.023.391 1.414 0l5.776-5.776c1.145-1.147 1.145-3.015 0-4.162-1.107-1.11-3.031-1.132-4.179.016-.171.179-2.047 2.289-4.328 4.856l-1.371 1.542c-.367.413-.33 1.044.083 1.412z"
+    ],
+    ['Exercise',
+      "m24,2h-1V0h-2v2H3V0H1v2H0v2h1v2h2v-2h.974l5.026,7.311v12.689h2v-5h2v5h2v-12.689l5.026-7.311h.974v2h2v-2h1v-2Zm-10.526,8h-2.947l-4.125-6h11.197l-4.125,6Zm-3.474-3c0-1.105.895-2,2-2s2,.895,2,2-.895,2-2,2-2-.895-2-2Z"
+    ],
+    ['Cooking',
+      "m8.641,13.528c-.678,1.049-.766,2.16-.254,3.214.385.79,1.109,1.533,2.154,2.208,1.162.75,2.123,1.031,2.91,1.031,1.4,0,2.253-.887,2.71-1.594,1.016-1.572,1.581-6.662,1.755-8.487L23.609,1.564c.312-.456.194-1.078-.262-1.39-.457-.312-1.078-.195-1.391.262l-5.495,8.046c-1.239.6-6.702,3.314-7.822,5.047Zm1.68,1.086h0c.374-.579,1.969-1.613,3.739-2.614l-3.2,4.686c-.31-.278-.545-.554-.674-.819-.144-.295-.239-.675.135-1.253Zm4.161,2.688c-.238.368-.661.979-1.932.455l2.886-4.226c-.277,1.72-.614,3.244-.955,3.771ZM2.355,9.607c-.189-.247-.252-.569-.17-.87.283-1.036.955-1.926,1.856-2.496-.006-.081-.009-.161-.009-.24,0-2.351,2.053-4.266,4.437-3.974.742-1.24,2.083-2.027,3.564-2.027s2.822.787,3.564,2.027c.904-.11,1.76.11,2.479.544l-2.968,4.345c-1.814.893-3.833,1.979-5.45,3.084H3.15c-.312,0-.605-.146-.795-.394Zm17.914.394l1.447-2.12c.127.312.224.638.273.977.041.287-.045.578-.234.798-.19.219-.466.345-.756.345h-.73Zm3.731,4.993c0,5.077-7,9-9,9h-6C7,23.994,0,20.071,0,14.994c0-.641.223-1.293.636-1.826.578-.746,1.45-1.174,2.392-1.174h4.274c-.128.151-.246.301-.342.449-1.062,1.644-1.195,3.481-.372,5.176.547,1.123,1.511,2.136,2.867,3.013,1.388.896,2.731,1.351,3.995,1.351,1.786,0,3.345-.891,4.39-2.509.786-1.215,1.409-3.733,1.86-7.479h1.271c.941,0,1.813.428,2.392,1.174.413.533.636,1.185.636,1.826Z"
     ]
+
+
+
   ]);
+
+  iconColor: Map<string, string> = new Map<string, string>([
+    ['Work', '#26cc63'],
+    ['Homework', '#db6466'],
+    ['Coding', '#62a7dc'],
+    ['Planning', '#e8ae0f'],
+    ['Design', '#774df1'],
+    ['Exercise', '#c465da'],
+    ['Cooking', '#8b7141']
+  ])
 
   ////////////////////////////////////////// API ////////////////////////////////////////////
 
@@ -159,28 +208,6 @@ export class TaskComponent {
     this.room_task = null;
 
   }
-  async submitroom() {
-    this.userService.ws.send(JSON.stringify({ userId: this.userService.user?.userid, type: "create_room", roomName: this.room_name }));
-    this.userService.getRoom('All');
-    const task = this.alltasks.find(t => t.task_id === this.room_task?.task_id);
-
-    const res = await fetch(`http://localhost:4000/updatetasksbyroomid`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ userId: this.userService.user?.userid, roomName: this.room_name, task_id: this.room_task?.task_id })
-    });
-
-    const data = await res.json();
-    if (task) {
-      task.room_id = data.roomid;
-    }
-
-    this.iscreateroom = false;
-    this.room_task = null;
-
-  }
 
   async roomchat(roomid: string, task_id: number, title: string) {
     this.room_task = { task_id: task_id, title: title };
@@ -200,23 +227,50 @@ export class TaskComponent {
   get alltasks() {
     return this.userService.alltasks;
   }
+  goToAddPage() {
+    this.userService.navFocus = 'Add'
+    this.router.navigate(['/Add']);
+  }
+  delete = false;
+  senddelete() {
+    this.delete = !this.delete;
+  }
+  canceldelete() {
+    this.delete = false;
+  }
+  async deletetask() {
+    try {
+      const res = await fetch(`http://localhost:4000/delete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ task_id: this.showTask.task_id })
+      });
 
-  tab = ['All', 'Mytask', 'Teamtask', 'Deadline', 'Completed']
+      const data = await res.json();
+      if (data.success) {
+        this.showTask = [];
+        this.isShowTask = false;
+        this.closetask();
+        alert(data.message)
+        await this.getTasks();
+      }
+
+    } catch (err) {
+      console.error('❌ Error:', err);
+    }
+
+  }
+
+
+
+  tab = ['All', 'My task', 'Team task', 'Deadline', 'Fav', 'Completed']
   tabfocus = 'All';
   chtabfocus(x: string) {
     this.tabfocus = x;
     this.getTasks();
   }
-
-  icons: Array<string[]> = [
-    ['bookmark',
-      "M2.849,23.55a2.954,2.954,0,0,0,3.266-.644L12,17.053l5.885,5.853a2.956,2.956,0,0,0,2.1.881,3.05,3.05,0,0,0,1.17-.237A2.953,2.953,0,0,0,23,20.779V5a5.006,5.006,0,0,0-5-5H6A5.006,5.006,0,0,0,1,5V20.779A2.953,2.953,0,0,0,2.849,23.55Z"
-    ],
-    ['roomchat',
-      "m7.5 13a4.5 4.5 0 1 1 4.5-4.5 4.505 4.505 0 0 1 -4.5 4.5zm7.5 7a5.006 5.006 0 0 0 -5-5h-5a5.006 5.006 0 0 0 -5 5v4h15zm2.5-11a4.5 4.5 0 1 1 4.5-4.5 4.505 4.505 0 0 1 -4.5 4.5zm1.5 2h-5a4.793 4.793 0 0 0 -.524.053 6.514 6.514 0 0 1 -1.576 2.216 7.008 7.008 0 0 1 5.1 6.731h7v-4a5.006 5.006 0 0 0 -5-5z"
-    ]
-
-  ];
 
 
   months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -228,16 +282,14 @@ export class TaskComponent {
     return `${day} ${month} ${year}`;
   }
 
-  categoryColor: Map<string, Array<string>> = new Map([
-    ['Work', ['#fcf4ecff', '#f37e00ff']], ['Homework', ['#efecfc', '#46359a']]
-  ])
-  tagColor: Map<string, Array<string>> = new Map([
-    ['Work', ['#efecfd', '#413291']], ['Homework', ['#f4f9f5', '#359b74']]
-  ])
 
-  getcategoryColor(x: string) {
-    return this.categoryColor.get(x)!;
+  get tagColor() {
+    return this.userService.tagColor;
   }
+  get userid() {
+    return this.userService.user?.userid;
+  }
+
   getarraycategory(x: string) {
     return x.split(',')
   }
@@ -245,6 +297,24 @@ export class TaskComponent {
   getCheckIconByStatus(status: string): string {
     return status === 'completed' ? this.getimg('checkbox')! : this.getimg('circle')!;
   }
+  getMember(id: string) {
+    const room = this.userService.allrooms.find(r => r.roomid = id);
+    return room?.member_id.split(',')
+  }
+
+  searchtask = '';
+  searchTask(i: string) {
+    const input = i.trim().toLowerCase();
+    if (!input) {
+      this.getTasks();
+      return;
+    }
+
+
+    const found = this.alltasks.filter(t => t.title.toLowerCase().startsWith(input));
+    this.userService.alltasks = found;
+  }
+
 
   /////////////////////////////////////////////show task////////////////////////////////
 
@@ -262,6 +332,7 @@ export class TaskComponent {
   }
   closetask() {
     const showtask = this.boxRef.nativeElement;
+    this.boxIndex = null;
     showtask.classList.remove('expand');
   }
 
@@ -293,35 +364,9 @@ export class TaskComponent {
 
   }
 
-  getDeadline(start: Date, end: Date): Array<string> {
-    const now = new Date();
-    const nowTime = now.getTime();
-    const startTime = (new Date(start)).getTime();
-    const endTime = (new Date(end)).getTime();
-
-    if (nowTime < startTime) {
-      const diffDays = Math.ceil((startTime - nowTime) / (1000 * 60 * 60 * 24));
-      return [`Starts in ${diffDays} day${diffDays > 1 ? 's' : ''}`, '#dcedd8ff', '#1ca425ff'];
-    }
-
-    if (nowTime >= startTime && nowTime <= endTime) {
-      const diffDays = Math.ceil((endTime - nowTime) / (1000 * 60 * 60 * 24));
-
-      if (diffDays >= 7) {
-        const week = Math.floor(diffDays / 7);
-        return [`${week} week${week > 1 ? 's' : ''} left`, '#dcedd8ff', '#1ca425ff'];
-      } else if (diffDays <= 3 && diffDays > 0) {
-        return [`${diffDays} day${diffDays !== 1 ? 's' : ''} left`, '#ffededff', '#db1c1cff'];
-      } else {
-        return [`${diffDays} day${diffDays !== 1 ? 's' : ''} left`, '#ebebebff', '#bac21dff'];
-      }
-    }
-
-    const overdueDays = Math.ceil((nowTime - endTime) / (1000 * 60 * 60 * 24));
-    return [`Overdue by ${overdueDays} day${overdueDays > 1 ? 's' : ''}`, '#f5f5f5ff', '#878787ff'];
+  getDeadline(start: Date, end: Date) {
+    return this.userService.getDeadline(start, end)
   }
-
-
   getPercent(task: any) {
     return this.userService.getPercent(task);
   }
@@ -377,37 +422,74 @@ export class TaskComponent {
     };
   }
 
-  ///////////////////////////////////////////////////////////////
-  // TypeScript (Angular)
-  selectedFile: File | null = null;
 
-  onFileSelected(event: any) {
-    const file = event.target.files[0];
+  ////////////////////// profile /////////////////////////////
+  imagePreview: string | null = null;
+  selectedFile: File | null = null;
+  newroomid = '';
+
+
+  async submitroom() {
+    this.userService.getRoom('All');
+    const task = this.alltasks.find(t => t.task_id === this.room_task?.task_id);
+
+    const res = await fetch(`http://localhost:4000/createroom`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ userId: this.userService.user?.userid, roomName: this.room_name, task_id: this.room_task?.task_id, task_title:this.room_task?.title})
+    });
+
+    const data = await res.json();
+    if (task) {
+      task.room_id = data.roomid;
+      this.newroomid = data.roomid;
+      await this.uploadProfile();
+      await this.userService.getRoom('All');
+
+    }
+
+    this.iscreateroom = false;
+    this.room_task = null;
+
+  }
+
+
+  onFileSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
       this.selectedFile = file;
-      console.log('file = ', file)
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.imagePreview = reader.result as string;
+      };
+      reader.readAsDataURL(file);
     }
+
   }
 
   async uploadProfile() {
     if (!this.selectedFile) {
-      alert('กรุณาเลือกไฟล์ก่อน');
       return;
     }
+
     const formData = new FormData();
     formData.append('file', this.selectedFile);
-    formData.append('userid', String(this.userService.user!.userid)); //รับเเค่ string
+    formData.append('roomid', String(this.newroomid));
+    formData.append('type', 'room');
+    formData.append('userid', '');
 
     const res = await fetch('http://localhost:4000/upload', {
       method: 'POST',
       body: formData
 
     })
-
     const data = await res.json();
-    alert(data.message)
 
   }
+
+
 
 
 

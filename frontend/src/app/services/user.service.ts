@@ -11,7 +11,7 @@ export class UserService {
   ) { }
 
   ws!: WebSocket;
-  user: { userid: number, username: string, email: string, profile: string } | null = null;
+  user: { userid: number, username: string, email: string, profile: string | null } | null = null;
 
   friend_chat: { friend_id: number; friend_name: string } | null = null;
   room_chat: { roomid: string, roomname: string, creater_id: number, member_id: string, task_title: string } | null = null;
@@ -19,7 +19,9 @@ export class UserService {
   roomchatList: any = [];
   chat_now: { type: string } | null = null;
 
-  allrooms: Array<{ roomid: string, roomname: string, creater_id: string, member_id: string, create_at: Date, task_title: string }> = [];
+  allrooms: Array<{ roomid: string, roomname: string, creater_id: string, member_id: string, create_at: Date, task_title: string, profile: string }> = [];
+  allfriends: Array<{ friend_id: number, friend_name: string, profile: string }> = [];
+
 
   alltasks: Array<{
     task_id: number,
@@ -33,6 +35,21 @@ export class UserService {
     bookmark: boolean,
     detail: Array<Array<{ detail_id: number, tasks: string, status: string, subtasks: Array<{ subtask: string, status: string }> }>>
   }> = []
+
+  tagColor: Map<string, Array<string>> = new Map([
+  ['Work', ['#fcf4ecff', '#f37e00ff']],
+  ['Homework', ['#efecfc', '#46359a']],
+  ['Coding', ['#eaf4fb', '#62a7dc']],
+  ['Planning', ['#fff9e6', '#e8ae0f']],
+  ['Design', ['#f1ebfc', '#774df1']],
+  ['Exercise', ['#faeafd', '#c465da']],
+  ['Cooking', ['#f3ede5', '#8b7141']]
+]);
+
+  navFocus: string = 'Dashboard'
+  chatFocus: Array<string | number> = ['', ''];
+
+
 
 
   async ngOnInit() {
@@ -270,6 +287,36 @@ export class UserService {
 
     if (total === 0) return [0, 0, 0];
     return [Math.round((done / total) * 100), total, done];
+  }
+
+
+
+  getDeadline(start: Date, end: Date): Array<string | boolean> {
+    const now = new Date();
+    const nowTime = now.getTime();
+    const startTime = (new Date(start)).getTime();
+    const endTime = (new Date(end)).getTime();
+
+    if (nowTime < startTime) {
+      const diffDays = Math.ceil((startTime - nowTime) / (1000 * 60 * 60 * 24));
+      return [`Starts in ${diffDays} day${diffDays > 1 ? 's' : ''}`, '#dcedd8ff', '#1ca425ff', false, false]; ///+ispass, +isstart
+    }
+
+    if (nowTime >= startTime && nowTime <= endTime) {
+      const diffDays = Math.ceil((endTime - nowTime) / (1000 * 60 * 60 * 24));
+
+      if (diffDays >= 7) {
+        const week = Math.floor(diffDays / 7);
+        return [`${week} week${week > 1 ? 's' : ''} left`, '#dcedd8ff', '#1ca425ff', false, true];
+      } else if (diffDays <= 3 && diffDays > 0) {
+        return [`${diffDays} day${diffDays !== 1 ? 's' : ''} left`, '#ffededff', '#db1c1cff', false, true];
+      } else {
+        return [`${diffDays} day${diffDays !== 1 ? 's' : ''} left`, '#ebebebff', '#bac21dff', false, true];
+      }
+    }
+
+    const overdueDays = Math.ceil((nowTime - endTime) / (1000 * 60 * 60 * 24));
+    return [`Overdue by ${overdueDays} day${overdueDays > 1 ? 's' : ''}`, '#f5f5f5ff', '#878787ff', true, true];
   }
 
 

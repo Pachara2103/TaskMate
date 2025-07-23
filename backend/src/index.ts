@@ -1,6 +1,5 @@
 import { ServerWebSocket } from "bun";
 import { Elysia, t } from 'elysia';
-import { SQL } from "bun";
 import bcrypt from 'bcryptjs';
 import { cors } from '@elysiajs/cors';
 
@@ -9,9 +8,10 @@ import { jwt } from '@elysiajs/jwt';
 import staticPlugin from '@elysiajs/static';
 import { writeFileSync } from 'fs'
 import { join } from 'path'
-import { writeFile } from "fs/promises";
+import postgres from 'postgres';
 
 
+const db = postgres(process.env.DATABASE_URL!);
 
 interface Subtask {
   subtask: string;
@@ -25,14 +25,6 @@ interface Detail {
   subtasks: Subtask[];
 }
 
-
-
-const db = new SQL({
-  url: "postgres://bas:password@localhost:2103/TaskMate",
-  // tls: false,
-  onconnect: client => console.log("✅ Connected to database"),
-  onclose: client => console.log("❎ Connection closed")
-});
 
 
 const app = new Elysia()
@@ -55,7 +47,8 @@ const app = new Elysia()
 
   .post('/upload', async ({ body }) => {
     console.log('file=', body.file)
-    const { file, userid } = body;
+    const { file, userid, roomid, type } = body;
+    const intuserid = Number(userid);
 
     try {
 
@@ -63,13 +56,21 @@ const app = new Elysia()
         console.log('upload failed');
         return { success: false, message: 'No file uploaded' };
       }
-
       const buffer = await file.arrayBuffer();
-      const filename = `profile-${userid}.png`;
-      const filepath = join('./src/uploads', filename);
+      let filename;
+      if (type === 'user') {
+        filename = `${userid}.png`;
+        await db`
+        update users set profile  = ${userid} where userid = ${intuserid}`;
+      }
+      else if (type === 'room') {
+        filename = `${roomid}.png`;
+        await db`
+        update rooms set profile  = ${roomid} where roomid = ${roomid}`;
+      }
+      const filepath = join('./src/uploads', filename!);
       writeFileSync(filepath, Buffer.from(buffer));
 
-      console.log('upload success:', filename);
       return { success: true, message: 'upload success', filename: filename };
     } catch (error) {
       console.error('Upload error:', error);
@@ -79,7 +80,9 @@ const app = new Elysia()
   }, {
     body: t.Object({
       file: t.File({ format: 'image/*' }),
-      userid: t.String()
+      userid: t.String(),
+      roomid: t.String(),
+      type: t.String()
     })
   })
 
@@ -87,11 +90,18 @@ const app = new Elysia()
 
 
   .get('/me', async ({ cookie, jwt }) => {
-    const token = cookie.userCookies?.value;
-    if (!token) return { success: false, message: 'No token found' };
-    const user = await jwt.verify(token);
-    if (!user) return { success: false, message: 'Invalid token' };
-    return { success: true, user: user };
+    try {
+      const token = cookie.userCookies?.value;
+      if (!token) return { success: false, message: 'No token found' };
+      const user = await jwt.verify(token);
+      if (!user) return { success: false, message: 'Invalid token' };
+      return { success: true, user: user };
+    }
+    catch (error) {
+      return { success: false };
+      console.error(error)
+    }
+
   })
 
   .post('/login', async ({ body, jwt, cookie: { userCookies } }) => {
@@ -141,9 +151,13 @@ const app = new Elysia()
       if (user.length === 0) {
         const newpass = await bcrypt.hash(password, 10);
 
-        await db`
-      insert into users (username, password, email) values(${username},${newpass}, ${email})`;
-        return { success: true, message: 'signup success please login' };
+        const inserted = await db`
+      insert into users (username, password, email) values(${username},${newpass}, ${email}) returning *`;
+
+        const newuserid = inserted[0].userid;
+
+
+        return { success: true, message: 'signup success please login', userid: newuserid };
 
       } else {
         return { success: false, message: 'This email already exists' };
@@ -238,33 +252,38 @@ const app = new Elysia()
       if (type === 'All') {
         raw = await db`
       SELECT 
-        t.task_id, t.title,t.description,t.category, t.type_task AS type,t.room_id,t.room_name,t.bookmark, t.start_time, t.end_time,d.detail_id, d.task_title, d.status AS detail_status, s.subtask, s.status AS subtask_status, s.subtask_id
-      FROM tasks t
-      JOIN task_details d ON t.task_id = d.task_id
-      LEFT JOIN task_subtasks s ON d.detail_id = s.detail_id
-      WHERE t.from_user_id = ${userid}
-      ORDER BY t.start_time, t.end_time asc;
+  t.task_id, t.title, t.description, t.category, 
+  t.type_task AS type, t.room_id, t.room_name, 
+  t.bookmark, t.start_time, t.end_time, 
+  d.detail_id, d.task_title, d.status AS detail_status, 
+  s.subtask, s.status AS subtask_status, s.subtask_id
+   FROM tasks t
+   JOIN task_details d ON t.task_id = d.task_id
+   LEFT JOIN task_subtasks s ON d.detail_id = s.detail_id
+   LEFT JOIN rooms r ON t.room_id = r.roomid
+   WHERE ${query.userid} = ANY (string_to_array(r.member_id, ',')) or t.from_user_id = ${userid}
+   ORDER BY t.start_time, t.end_time ASC;
     `;
-    // ORDER BY t.task_id, d.detail_id, s.subtask_id asc;
       }
-      else if (type === 'Mytask') {
+      else if (type === 'My task') {
         raw = await db`
       SELECT 
         t.task_id, t.title,t.description,t.category, t.type_task AS type,t.room_id,t.room_name,t.bookmark, t.start_time, t.end_time,d.detail_id, d.task_title, d.status AS detail_status, s.subtask, s.status AS subtask_status, s.subtask_id
       FROM tasks t
       JOIN task_details d ON t.task_id = d.task_id
       LEFT JOIN task_subtasks s ON d.detail_id = s.detail_id
-      WHERE t.from_user_id = ${userid} and t.type_task = 'mytask'
+      WHERE t.from_user_id = ${userid} and t.type_task = 'personal'
       ORDER BY t.task_id, d.detail_id, s.subtask_id asc;
     `;
-      } else if (type === 'Teamtask') {
+      } else if (type === 'Team task') {
         raw = await db`
       SELECT 
         t.task_id, t.title,t.description,t.category, t.type_task AS type,t.room_id,t.room_name,t.bookmark, t.start_time, t.end_time,d.detail_id, d.task_title, d.status AS detail_status, s.subtask, s.status AS subtask_status, s.subtask_id
       FROM tasks t
       JOIN task_details d ON t.task_id = d.task_id
       LEFT JOIN task_subtasks s ON d.detail_id = s.detail_id
-      WHERE t.from_user_id = ${userid} and t.type_task = 'teamtask'
+      LEFT JOIN rooms r ON t.room_id = r.roomid
+      WHERE t.type_task = 'team' and ( ${query.userid} = ANY (string_to_array(r.member_id, ',')) or t.from_user_id = ${userid})
       ORDER BY t.task_id, d.detail_id, s.subtask_id asc;
     `;
       } else if (type === 'Deadline') {
@@ -274,9 +293,37 @@ const app = new Elysia()
       FROM tasks t
       JOIN task_details d ON t.task_id = d.task_id
       LEFT JOIN task_subtasks s ON d.detail_id = s.detail_id
-      WHERE t.from_user_id = ${userid}
+      LEFT JOIN rooms r ON t.room_id = r.roomid
+      WHERE ${query.userid} = ANY (string_to_array(r.member_id, ',')) or t.from_user_id = ${userid}
       ORDER BY t.end_time asc;
     `;
+      }
+      else if (type === 'Completed') {
+        raw = await db`
+   SELECT t.task_id, t.title, t.description, t.category, t.type_task AS type, t.room_id, t.room_name, t.bookmark, t.start_time, t.end_time, d.detail_id, d.task_title, d.status AS detail_status, s.subtask, s.status AS subtask_status, s.subtask_id
+   FROM tasks t JOIN task_details d ON t.task_id = d.task_id LEFT JOIN task_subtasks s ON d.detail_id = s.detail_id LEFT JOIN rooms r ON t.room_id = r.roomid
+WHERE (${query.userid} = ANY (string_to_array(r.member_id, ',')) OR t.from_user_id = ${userid})
+  AND NOT EXISTS (
+    SELECT 1 FROM task_details td 
+    WHERE td.task_id = t.task_id AND td.status != 'completed'
+  )
+  AND NOT EXISTS (
+    SELECT 1 FROM task_details td
+    JOIN task_subtasks st ON st.detail_id = td.detail_id
+    WHERE td.task_id = t.task_id AND st.status != 'completed'
+  )
+ORDER BY t.end_time ASC;`;
+      } else if (type === 'Fav') {
+        raw = await db`
+  SELECT t.task_id, t.title, t.description, t.category, t.type_task AS type, t.room_id, t.room_name, t.bookmark, t.start_time, t.end_time, d.detail_id, d.task_title, d.status AS detail_status, s.subtask, s.status AS subtask_status, s.subtask_id
+FROM tasks t
+JOIN task_details d ON t.task_id = d.task_id
+LEFT JOIN task_subtasks s ON d.detail_id = s.detail_id
+LEFT JOIN rooms r ON t.room_id = r.roomid
+WHERE t.bookmark = true
+  AND (${query.userid} = ANY (string_to_array(r.member_id, ',')) OR t.from_user_id = ${userid})
+ORDER BY t.end_time ASC;
+`;
       }
 
       else {
@@ -418,7 +465,7 @@ const app = new Elysia()
     const userid = Number(query.userid);
 
     const result = await db`
-    SELECT u.userid as friend_id, u.username as friend_name
+    SELECT u.userid as friend_id, u.username as friend_name, u.profile
     FROM friends f
     JOIN users u ON u.userid = 
       CASE 
@@ -437,7 +484,7 @@ const app = new Elysia()
 
     const result = await db`
     SELECT * FROM rooms WHERE ${userid} = ANY (string_to_array(member_id, ','));`;
-    console.log('room= ', result)
+    // console.log('room= ', result)
 
     return {
       success: true, message: 'Fetched all rooms and statuses', allrooms: result
@@ -457,6 +504,7 @@ const app = new Elysia()
         !start_time ||
         !end_time ||
         !type_task?.trim()
+        || main_task.length === 0
       ) {
         return {
           success: false,
@@ -471,27 +519,29 @@ const app = new Elysia()
       VALUES (${userid}, ${title}, ${description}, ${category}, ${start_time}, ${end_time}, ${type_task})
       RETURNING task_id;
     `;
-      const taskId = inserted[0]?.task_id;
+      const taskId = inserted[0].task_id;
 
       for (let i = 0; i < main_task.length; i++) {
         const main = main_task[i];
 
         const detail = await db`
-        INSERT INTO task_details (task_id, status, task_title)
-        VALUES (${taskId}, 'incomplete', ${main})
+        INSERT INTO task_details (task_id, task_title)
+        VALUES (${taskId}, ${main})
         RETURNING detail_id;
       `;
+
         const detailId = detail[0]?.detail_id;
+        if (sub_task.length != 0) {
+          for (let j = 0; j < sub_task[i].length; j++) {
+            const sub = sub_task[i][j];
 
-
-        for (let j = 0; j < sub_task[i].length; j++) {
-          const sub = sub_task[i][j];
-
-          await db`
-          INSERT INTO task_subtasks (detail_id, status, subtask)
-          VALUES (${detailId}, 'incomplete', ${sub});
+            await db`
+          INSERT INTO task_subtasks (detail_id, subtask)
+          VALUES (${detailId},${sub});
         `;
+          }
         }
+
       }
 
       return {
@@ -551,8 +601,42 @@ const app = new Elysia()
     };
   })
 
-  .post('/updatetasksbyroomid', async ({ body }: { body: { userId: number, task_id: number, roomName: string } }) => {
-    const { userId, roomName, task_id } = body;
+  .get('/daterange', async () => {
+    const min = await db`SELECT MIN(start_time) AS min FROM tasks`;
+    const max = await db`SELECT MAX(end_time) AS max FROM tasks`;
+    return {
+      success: true,
+      message: 'Got date range successfully',
+      min: min[0].min,
+      max: max[0].max
+    };
+  })
+
+  .post('/delete', async ({ body }: { body: { task_id: number } }) => {
+    const { task_id } = body;
+    await db`
+       delete from tasks where task_id = ${task_id}`;
+
+    return {
+      success: true,
+      message: 'delete successfully',
+    };
+  })
+
+  .get('/daterange', async () => {
+    const min = await db`SELECT MIN(start_time) AS min FROM tasks`;
+    const max = await db`SELECT MAX(end_time) AS max FROM tasks`;
+    return {
+      success: true,
+      message: 'Got date range successfully',
+      min: min[0].min,
+      max: max[0].max
+    };
+  })
+
+
+  .post('/createroom', async ({ body }: { body: { userId: number, task_id: number, roomName: string, task_title:string } }) => {
+    const { userId, roomName, task_id, task_title } = body;
     const struserId = String(userId);
     const roomid = getroomId(userId, roomName)
 
@@ -561,15 +645,16 @@ const app = new Elysia()
       const room = await db`
           select * from rooms
           where roomid = ${roomid}`; ///RETURNING ใช้ได้กับคำสั่ง INSERT, UPDATE, หรือ DELETE เท่านั้น
-      let insert;
 
       if (room.length === 0) {
-        insert = await db`
-          insert into rooms (roomid,roomname, creater_id, member_id) 
-          values (${roomid},${roomName}, ${userId}, ${struserId}) RETURNING *`;
+
+        await db`
+          insert into rooms (roomid,roomname, creater_id, member_id, task_title) 
+          values (${roomid},${roomName}, ${userId}, ${struserId}, ${task_title})`;
+
 
         await db`update tasks set room_id = ${roomid}  where task_id = ${task_id}`;
-        console.log("create room successful");
+        console.log("create successfully")
 
         return {
           success: true,
@@ -690,9 +775,7 @@ console.log('🟢 Elysia server running on http://localhost:4000');
 
 
 
-// const sockets = new Set<WebSocket>();
 
-const roomMembers = new Map<string, Set<string>>();
 const connections = new Map<string, ServerWebSocket<any>>();
 
 function getroomId(userId: number, roomName: string): string {
@@ -742,48 +825,6 @@ Bun.serve({
 
       const { type } = msg;
 
-      if (type === "create_room") {
-
-      }
-
-      if (type === "invite") {
-        const { roomId, friendId } = msg;
-        const strfriendId = String(friendId);
-
-        //มีห้องนี้ยัง มีเพื่อนคนนี้ยัง
-        try {
-
-          const room = await db` select * from rooms where roomid = ${roomId}`;
-
-          if (room.length === 0) {
-            // ws.send(JSON.stringify({
-            //   type: "create_room_response",
-            //   success: false,
-            //   message: "do not have this room"
-            // }));
-          } else {
-            const member = (room[0].member_id).split(',')
-
-            if (member.includes(strfriendId)) {
-              // ws.send(JSON.stringify({
-              //   success: false,
-              //   message: "this friend has already in this room"
-              // }));
-
-            } else {
-              member.push(strfriendId);
-              const new_member = member.join(',')
-              await db`
-                update rooms
-                set member_id = ${new_member}
-                where roomid = ${roomId} `;
-              console.log("invite friend successful");
-            }
-          }
-        } catch (e) {
-          console.error(e, "invite friend unsuccessful");
-        }
-      }
 
       if (type === "room_message") {
         const { userId, message, roomId } = msg;
@@ -850,7 +891,6 @@ Bun.serve({
     },
 
     close(ws) {
-      // sockets.delete(ws);
       console.log("🔴 Client disconnected");
     },
 

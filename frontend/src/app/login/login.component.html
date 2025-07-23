@@ -1,15 +1,14 @@
-<div class="login-container">
-
-    <div class="login-box">
-        <div [style.marginBottom.px]="signup ? 30 : 50"
-            style="flex-direction: column; display: flex; text-align: center; width: 100%;">
-            <label style="font-size: 40px; font-weight: bold;">{{signup ? "Sign up":"Login"}}</label>
+<div class="signin-container"
+    [ngStyle]="{'width':signup? '32vw':'', 'height':signup? '90vh':'', 'top':signup? '6vh':''}">
+    <div style="position: relative;align-items: center;flex-direction: column;display: flex;">
+        <div style="flex-direction: column; display: flex; text-align: center; width: 100%;">
+            <label style="font-size: 40px; font-weight: bold;">{{signup? 'Sign up':'Login'}}</label>
             <label style="font-size: 16px; color: #a1a1a1;">Please enter your detail</label>
         </div>
 
         <section id="signin">
 
-            <div class="box" *ngIf="!signup">
+            <div style=" flex-direction: column; display: flex; width: 100%;" *ngIf="!signup">
 
                 <div class="input-box">
                     <label> Email</label>
@@ -36,11 +35,12 @@
         </section>
 
         <section id="signup">
-            <div class="box" *ngIf="signup">
+
+            <div style=" flex-direction: column; display: flex; width: 17vw; background-color: #2469e0;" *ngIf="signup">
 
                 <div class="input-box">
                     <label> Username</label>
-                    <input type="text"  [(ngModel)]="username">
+                    <input type="text" [(ngModel)]="username">
                 </div>
 
                 <div class="input-box">
@@ -58,6 +58,21 @@
                     <input type="password" [(ngModel)]="confrimpassword">
                 </div>
 
+                <div
+                    style="flex-direction: row; display: flex; justify-content: center; align-items: center; gap: 20px; margin-bottom: 15px;">
+                    <input type="file" id="fileInput" accept="image/*" (change)="onFileSelected($event)"
+                        style="display: none;" />
+
+                    <label for="fileInput"
+                        [ngStyle]="{'background-image': imagePreview ? 'url(' + imagePreview + ')' : '','background-size': 'cover','background-position': 'center'}"
+                        style="width: 70px; height: 70px; background-color: #a1a1a1; border-radius: 50%; cursor: pointer; display: flex; overflow: hidden; justify-content: center; align-items: center;">
+                        <img *ngIf="imagePreview" src="images/icons/default.png" style="width: 70%; height: 70%;">
+                    </label>
+
+                    <div>Select your profile</div>
+                </div>
+
+
                 <button class="button" (click)="sendSignup(username, email, password, confrimpassword)">Sign up</button>
 
                 <div style="flex-direction: row; display: flex; justify-content: center; margin: 10px;">
@@ -74,55 +89,47 @@
 
 </div>
 
+
+
+
 <img src="images/login.png" style="width: 100vw; height: 100vh;">
 <style>
-    .login-container {
+    .signin-container {
         position: absolute;
         left: 8vw;
         top: 8vh;
         border-radius: 100px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-
         background-color: #fff;
-        width: 32vw;
-        height: 80vh;
         display: flex;
         justify-content: center;
         align-items: center;
 
-        & .login-box {
-            position: relative;
-            align-items: center;
-            flex-direction: column;
-            display: flex;
-
-        }
+        width: 32vw;
+        height: 80vh;
     }
 
-    .box {
+
+
+
+    .input-box {
         flex-direction: column;
         display: flex;
-        /* background-color: aqua; */
-        width: 100%;
-
-        & .input-box {
-            flex-direction: column;
-            display: flex;
-            margin-bottom: 20px;
-        }
-
-        & .input-box input {
-            width: 98%;
-            height: 35px;
-            border-radius: 5px;
-            border: solid 1px #d1d1d1
-        }
-
-        & .input-box label {
-            margin-bottom: 5px;
-            font-size: 16px;
-        }
+        margin-bottom: 20px;
     }
+
+    .input-box input {
+        width: 98%;
+        height: 35px;
+        border-radius: 5px;
+        border: solid 1px #d1d1d1
+    }
+
+    .input-box label {
+        margin-bottom: 5px;
+        font-size: 16px;
+    }
+
 
     .button {
         width: 100%;
