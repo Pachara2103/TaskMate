@@ -127,19 +127,22 @@
 
                             <div *ngFor="let task of alltasks; let i =index">
 
-                                <div [style.width.px]="getDuration(task.start_time, task.end_time, task.detail)[0] * 73"
-                                    [style.margin-left.px]="getDuration(task.start_time, task.end_time, task.detail)[1]*75 + 5*76.5"
-                                    class="timelinecolor" [ngStyle]="{'background-color': assignColor(i)[0]}">
-                                    {{getDuration(task.start_time, task.end_time, task.detail)[3]===0 ? '0 %': ''}}
+                                <div [ngStyle]="{'margin-left': getMarginLeft(i, task)}"
+                                    style="flex-direction: row; display: flex; gap: 10px;">
 
-                                    <div [style.width.px]="getDuration(task.start_time, task.end_time, task.detail)[2] * 73"
-                                        [ngStyle]="{'padding':getDuration(task.start_time, task.end_time, task.detail)[3]===0? '0':'5px' , 'background-color': assignColor(i)[1]}"
-                                        class="timelinemaincolor">
-                                        {{getDuration(task.start_time, task.end_time, task.detail)[3]===0 ? '':
-                                        getDuration(task.start_time, task.end_time, task.detail)[3]+' %'}}
+                                    <div [style.width.px]="getDuration(task.start_time, task.end_time, task.detail)[0] * 73"
+                                        class="timelinecolor" [ngStyle]="{'background-color': assignColor(i)[0]}">
+                                        {{getDuration(task.start_time, task.end_time, task.detail)[3]===0 ? '0 %': ''}}
+
+                                        <div [style.width.px]="getDuration(task.start_time, task.end_time, task.detail)[2] * 73"
+                                            [ngStyle]="{'padding':getDuration(task.start_time, task.end_time, task.detail)[3]===0? '0':'5px' , 'background-color': assignColor(i)[1]}"
+                                            class="timelinemaincolor">
+                                            {{getDuration(task.start_time, task.end_time, task.detail)[3]===0 ? '':
+                                            getDuration(task.start_time, task.end_time, task.detail)[3]+' %'}}
+                                        </div>
                                     </div>
 
-                                    <div style="position: absolute; right: -11vw;">
+                                    <div>
                                         <div style="flex-direction: row; display: flex;">
                                             <div class="timelinetitle"
                                                 [ngStyle]="{'background-color': isOverdue(task.end_time) ? '#e5e5e5' : '#4188c9','color': isOverdue(task.end_time) ? '#727272' : '#dbf1fe','box-shadow': isOverdue(task.end_time) ? '' : '0 4px 5px rgba(0, 0, 0, 0.3)'}">
@@ -174,8 +177,9 @@
                                         </div>
 
                                     </div>
-
                                 </div>
+
+
 
                             </div>
                         </div>
@@ -332,7 +336,6 @@
     }
 
     .timelinetitle {
-        width: 10vw;
         height: 30px;
         flex-wrap: wrap;
         flex-shrink: 0;

@@ -1,4 +1,4 @@
-import { NgClass, NgFor, NgIf, NgStyle } from '@angular/common';
+import { NgFor, NgIf, NgStyle } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, QueryList, ViewChild, ViewChildren } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { UserService } from '../services/user.service';
@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [FormsModule, NgIf, NgFor, NgClass, NgStyle, ChatComponent],
+  imports: [FormsModule, NgIf, NgFor, NgStyle, ChatComponent],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
 })
@@ -278,19 +278,30 @@ export class DashboardComponent implements AfterViewInit {
     const s = new Date(start);
     const e = new Date(end);
 
-    const length = Math.floor((e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24)) + 2;
+    const length = Math.floor((e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24)) + 1;
     const start_point = Math.ceil((s.getTime() - start_task.getTime()) / (1000 * 60 * 60 * 24));
 
     const percent = this.userService.getPercent(task);
 
     return [length, start_point, (length / 100) * percent[0], percent[0]];
   }
+  getMarginLeft(i: number, task: any): string {
+    const duration = this.getDuration(task.start_time, task.end_time, task.detail)[1];
+    // const margin = i !== 0 ? duration * 75 + 4 * 76.5 : duration * 75 + 5 * 76.5;
+    const margin = duration * 75 + 5 * 76.5;
+
+    return `${margin}px`;
+  }
+
 
 
   isOverdue(end: Date | string) {
     const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
     const e = new Date(end);
-    // console.log('endtime = ',e.toDateString(),'today = ', now.toDateString(),'overdue = ', now>e);
+    e.setHours(0, 0, 0, 0);
+
     return new Date() > e;
   }
 
@@ -335,7 +346,7 @@ export class DashboardComponent implements AfterViewInit {
       const box = todayBox.nativeElement;
       const offsetLeft = box.offsetLeft;
 
-      container.scrollTo({ left: offsetLeft - 380, behavior: 'smooth' });
+      container.scrollTo({ left: offsetLeft - 5, behavior: 'smooth' });
     } else {
       console.warn('❌ ไม่เจอ date=', today);
     }

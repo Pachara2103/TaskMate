@@ -1,7 +1,7 @@
 import { NgFor, NgIf, NgStyle } from '@angular/common';
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -11,7 +11,7 @@ import { UserService } from '../services/user.service';
 
 @Component({
   selector: 'app-add-task',
-  imports: [RouterLink, NgFor, NgIf, NgStyle, FormsModule, MatInputModule, MatNativeDateModule, MatFormFieldModule, MatDatepickerModule],
+  imports: [NgFor, NgIf, NgStyle, FormsModule, MatInputModule, MatNativeDateModule, MatFormFieldModule, MatDatepickerModule],
   standalone: true,
   templateUrl: './add-task.component.html',
   styleUrl: './add-task.component.css'

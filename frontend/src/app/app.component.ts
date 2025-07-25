@@ -1,19 +1,17 @@
 import { Component, ElementRef, SimpleChanges, ViewChild } from '@angular/core';
-import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
-import { NavbarComponent } from './navbar/navbar.component';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { NgClass, NgFor, NgIf } from '@angular/common';
 import { filter } from 'rxjs/operators';
 
 import { UserService } from './services/user.service';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { FormsModule } from '@angular/forms';
-import { BehaviorSubject } from 'rxjs';
 
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, NavbarComponent, NgIf, NgClass, NgFor, DragDropModule, FormsModule],
+  imports: [RouterOutlet, NgIf, NgClass, NgFor, DragDropModule, FormsModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

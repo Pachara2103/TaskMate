@@ -57,8 +57,8 @@
           </div>
         </div>
 
-        <div style="flex-direction: row; display: flex;">
-          <div class="invitefriend" (click)="sendinvite()">
+        <div *ngIf="!ismsg"  style="flex-direction: row; display: flex;">
+          <div *ngIf="getChatName().isroom"  class="invitefriend" (click)="sendinvite()">
             <img src="images/icons/adduser.png" style="width: 100%; height: 100%;">
           </div>
 
@@ -198,9 +198,6 @@
                 style="background-color: #51a7ed; padding: 5px; cursor: pointer;border-radius: 5px; box-shadow: 0px 6px 10px  rgba(79, 129, 196, 0.5);">
                 Add</div>
             </div>
-
-
-
 
 
           </div>

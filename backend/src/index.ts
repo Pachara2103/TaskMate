@@ -11,7 +11,7 @@ import { join } from 'path'
 import postgres from 'postgres';
 
 
-const db = postgres(process.env.DATABASE_URL!);
+const db = postgres(process.env.DATABASE_URL2!);
 
 interface Subtask {
   subtask: string;

@@ -1,7 +1,7 @@
 <div class="signin-container"
-    [ngStyle]="{'width':signup? '32vw':'', 'height':signup? '90vh':'', 'top':signup? '6vh':''}">
+    [ngStyle]="{'width':signup? '32vw':'', 'height':signup? '90vh':'75vh', 'top':signup? '6vh':''}">
     <div style="position: relative;align-items: center;flex-direction: column;display: flex;">
-        <div style="flex-direction: column; display: flex; text-align: center; width: 100%;">
+        <div style="flex-direction: column; display: flex; text-align: center; width: 100%; margin-bottom: 15px;" [ngStyle]="{'margin-bottom':signup?'':'40px'}">
             <label style="font-size: 40px; font-weight: bold;">{{signup? 'Sign up':'Login'}}</label>
             <label style="font-size: 16px; color: #a1a1a1;">Please enter your detail</label>
         </div>
@@ -21,7 +21,6 @@
                 </div>
 
                 <button class="button" (click)="sendLogin(email, password)">Sign in</button>
-                <button class="google">Sign in with Google</button>
 
                 <div style="flex-direction: row; display: flex; justify-content: center; margin: 10px;">
                     <label style="color: #a1a1a1;">Don't have a account ? </label>
@@ -36,7 +35,7 @@
 
         <section id="signup">
 
-            <div style=" flex-direction: column; display: flex; width: 17vw; background-color: #2469e0;" *ngIf="signup">
+            <div style=" flex-direction: column; display: flex; width: 17vw;" *ngIf="signup">
 
                 <div class="input-box">
                     <label> Username</label>
@@ -65,11 +64,11 @@
 
                     <label for="fileInput"
                         [ngStyle]="{'background-image': imagePreview ? 'url(' + imagePreview + ')' : '','background-size': 'cover','background-position': 'center'}"
-                        style="width: 70px; height: 70px; background-color: #a1a1a1; border-radius: 50%; cursor: pointer; display: flex; overflow: hidden; justify-content: center; align-items: center;">
-                        <img *ngIf="imagePreview" src="images/icons/default.png" style="width: 70%; height: 70%;">
+                        style="width: 70px; height: 70px; background-color: #d6d6d6; border-radius: 50%; cursor: pointer; display: flex; overflow: hidden; justify-content: center; align-items: center;">
+                        <img *ngIf="!imagePreview" src="images/icons/default.png" style="width: 70%; height: 70%;">
                     </label>
 
-                    <div>Select your profile</div>
+                    <div>Click to change profile</div>
                 </div>
 
 

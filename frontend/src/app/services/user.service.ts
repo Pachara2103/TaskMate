@@ -37,14 +37,14 @@ export class UserService {
   }> = []
 
   tagColor: Map<string, Array<string>> = new Map([
-  ['Work', ['#fcf4ecff', '#f37e00ff']],
-  ['Homework', ['#efecfc', '#46359a']],
-  ['Coding', ['#eaf4fb', '#62a7dc']],
-  ['Planning', ['#fff9e6', '#e8ae0f']],
-  ['Design', ['#f1ebfc', '#774df1']],
-  ['Exercise', ['#faeafd', '#c465da']],
-  ['Cooking', ['#f3ede5', '#8b7141']]
-]);
+    ['Work', ['#fcf4ecff', '#f37e00ff']],
+    ['Homework', ['#efecfc', '#46359a']],
+    ['Coding', ['#eaf4fb', '#62a7dc']],
+    ['Planning', ['#fff9e6', '#e8ae0f']],
+    ['Design', ['#f1ebfc', '#774df1']],
+    ['Exercise', ['#faeafd', '#c465da']],
+    ['Cooking', ['#f3ede5', '#8b7141']]
+  ]);
 
   navFocus: string = 'Dashboard'
   chatFocus: Array<string | number> = ['', ''];
@@ -289,38 +289,40 @@ export class UserService {
     return [Math.round((done / total) * 100), total, done];
   }
 
-
-
   getDeadline(start: Date, end: Date): Array<string | boolean> {
     const now = new Date();
-    const nowTime = now.getTime();
-    const startTime = (new Date(start)).getTime();
-    const endTime = (new Date(end)).getTime();
+    now.setHours(0, 0, 0, 0); 
 
-    if (nowTime < startTime) {
-      const diffDays = Math.ceil((startTime - nowTime) / (1000 * 60 * 60 * 24));
-      return [`Starts in ${diffDays} day${diffDays > 1 ? 's' : ''}`, '#dcedd8ff', '#1ca425ff', false, false]; ///+ispass, +isstart
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    startDate.setHours(0, 0, 0, 0);
+    endDate.setHours(0, 0, 0, 0);
+
+    const diffStart = startDate.getTime() - now.getTime();
+    const diffEnd = endDate.getTime() - now.getTime();
+
+    if (diffStart > 0) {
+      const diffDays = Math.ceil(diffStart / (1000 * 60 * 60 * 24));
+      return [`Starts in ${diffDays} day${diffDays > 1 ? 's' : ''}`, '#dcedd8ff', '#1ca425ff', false, false];
     }
 
-    if (nowTime >= startTime && nowTime <= endTime) {
-      const diffDays = Math.ceil((endTime - nowTime) / (1000 * 60 * 60 * 24));
-
+    if (diffEnd >= 0) {
+      const diffDays = Math.ceil(diffEnd / (1000 * 60 * 60 * 24));
       if (diffDays >= 7) {
         const week = Math.floor(diffDays / 7);
         return [`${week} week${week > 1 ? 's' : ''} left`, '#dcedd8ff', '#1ca425ff', false, true];
       } else if (diffDays <= 3 && diffDays > 0) {
         return [`${diffDays} day${diffDays !== 1 ? 's' : ''} left`, '#ffededff', '#db1c1cff', false, true];
+      } else if (diffDays === 0) {
+        return ['Today', '#fff4dcff', '#d79a00ff', false, true];
       } else {
         return [`${diffDays} day${diffDays !== 1 ? 's' : ''} left`, '#ebebebff', '#bac21dff', false, true];
       }
     }
 
-    const overdueDays = Math.ceil((nowTime - endTime) / (1000 * 60 * 60 * 24));
+    const overdueDays = Math.ceil((now.getTime() - endDate.getTime()) / (1000 * 60 * 60 * 24));
     return [`Overdue by ${overdueDays} day${overdueDays > 1 ? 's' : ''}`, '#f5f5f5ff', '#878787ff', true, true];
   }
-
-
-
 
 
 }
