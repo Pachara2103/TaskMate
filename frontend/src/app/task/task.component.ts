@@ -134,7 +134,7 @@ export class TaskComponent {
 
   async togglemaincheck(main: any, task_id: number) {
     try {
-      const res = await fetch(`http://localhost:4000/updatemainstatus`, {
+      const res = await fetch(`http://localhost:4000/task/updatemainstatus`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -154,7 +154,7 @@ export class TaskComponent {
 
   async togglesubcheck(main: any, sub: any, task_id: number) {
     try {
-      const res = await fetch(`http://localhost:4000/updatesubstatus`, {
+      const res = await fetch(`http://localhost:4000/task/updatesubstatus`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -179,7 +179,7 @@ export class TaskComponent {
     }
 
     try {
-      const res = await fetch(`http://localhost:4000/updatebookmark`, {
+      const res = await fetch(`http://localhost:4000/task/updatebookmark`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -241,8 +241,8 @@ export class TaskComponent {
   async deletetask() {
     this.delete = false;
     try {
-      const res = await fetch(`http://localhost:4000/delete`, {
-        method: 'POST',
+      const res = await fetch(`http://localhost:4000/task`, {
+        method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
         },
@@ -434,7 +434,7 @@ export class TaskComponent {
     this.userService.getRoom('All');
     const task = this.alltasks.find(t => t.task_id === this.room_task?.task_id);
 
-    const res = await fetch(`http://localhost:4000/createroom`, {
+    const res = await fetch(`http://localhost:4000/room`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

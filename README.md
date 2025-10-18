@@ -1,5 +1,7 @@
 ## About The Project
-This is my first personal project using Elysia and AngularJS. It was created to practice working with these. The project, Task Mate, is a task management system where users can create both personal and team tasks. It also includes a dashboard that displays your work progress for easy tracking. Additionally, users can chat with each other and create rooms for projects to share tasks collaboratively.
+A task management system where users can create both personal and team tasks. It also includes a dashboard that displays your work progress for easy tracking. Additionally,  users can chat with each other and create rooms for projects to share tasks collaboratively.
+
+- Built with Elysia and AngularJS (first-time experience)
 
 ### 🛠 Tech Stack
 - Backend: [Elysia](https://elysiajs.com/)
@@ -71,6 +73,11 @@ This is my first personal project using Elysia and AngularJS. It was created to 
 - Chat with your friends
 - Create rooms for managing team tasks
 
+### Schema
+<p align="center">
+  <img src="./demo/schema.png" alt="Schema" width="50%"  />
+</p>
+
 ## 🚀 Getting Started
 #### Using Docker Compose
  ```sh 
@@ -85,11 +92,14 @@ This is my first personal project using Elysia and AngularJS. It was created to 
 #### available at http://localhost:4200/
 
 
-### Future Improvements
-- Deploy ด้วย CI/CD
+### Improvements
+- เพิ่มการยืนยันตัวตน during request เพื่อความปลอดภัยของระบบ
+- design database ให้ดีกว่านี้
+- วางโครงสร้างใน frontend, backend ให้ดีขึ้น
 
 ### Contact
 - Gmail: patcharaauikim3800@gmail.com
+
 
 
 

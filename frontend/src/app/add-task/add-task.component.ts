@@ -11,17 +11,25 @@ import { UserService } from '../services/user.service';
 
 @Component({
   selector: 'app-add-task',
-  imports: [NgFor, NgIf, NgStyle, FormsModule, MatInputModule, MatNativeDateModule, MatFormFieldModule, MatDatepickerModule],
+  imports: [
+    NgFor,
+    NgIf,
+    NgStyle,
+    FormsModule,
+    MatInputModule,
+    MatNativeDateModule,
+    MatFormFieldModule,
+    MatDatepickerModule,
+  ],
   standalone: true,
   templateUrl: './add-task.component.html',
-  styleUrl: './add-task.component.css'
+  styleUrl: './add-task.component.css',
 })
 export class AddTaskComponent {
   constructor(
     private userService: UserService,
     private router: ActivatedRoute
-
-  ) { }
+  ) {}
   async ngOnInit() {
     const saveduser = localStorage.getItem('user');
     if (saveduser) {
@@ -32,23 +40,24 @@ export class AddTaskComponent {
   edit = false;
 
   checkEmpty(x: string[], i: number) {
-    console.log(x.length, "index=", i);
+    console.log(x.length, 'index=', i);
     return x.length === 0;
   }
 
   imgsrc: Map<string, string> = new Map([
-    ['plus',
-      "M19,0H5C2.243,0,0,2.243,0,5v14c0,2.757,2.243,5,5,5h14c2.757,0,5-2.243,5-5V5c0-2.757-2.243-5-5-5Zm-3,13h-3v3c0,.553-.448,1-1,1s-1-.447-1-1v-3h-3c-.552,0-1-.447-1-1s.448-1,1-1h3v-3c0-.553,.448-1,1-1s1,.447,1,1v3h3c.552,0,1,.447,1,1s-.448,1-1,1Z"
+    [
+      'plus',
+      'M19,0H5C2.243,0,0,2.243,0,5v14c0,2.757,2.243,5,5,5h14c2.757,0,5-2.243,5-5V5c0-2.757-2.243-5-5-5Zm-3,13h-3v3c0,.553-.448,1-1,1s-1-.447-1-1v-3h-3c-.552,0-1-.447-1-1s.448-1,1-1h3v-3c0-.553,.448-1,1-1s1,.447,1,1v3h3c.552,0,1,.447,1,1s-.448,1-1,1Z',
     ],
-    ['delete',
-      "m19,0H5C2.243,0,0,2.243,0,5v14c0,2.757,2.243,5,5,5h14c2.757,0,5-2.243,5-5V5c0-2.757-2.243-5-5-5Zm-3,13h-8c-.552,0-1-.448-1-1s.448-1,1-1h8c.552,0,1,.448,1,1s-.448,1-1,1Z"
+    [
+      'delete',
+      'm19,0H5C2.243,0,0,2.243,0,5v14c0,2.757,2.243,5,5,5h14c2.757,0,5-2.243,5-5V5c0-2.757-2.243-5-5-5Zm-3,13h-8c-.552,0-1-.448-1-1s.448-1,1-1h8c.552,0,1,.448,1,1s-.448,1-1,1Z',
     ],
-    ['bin',
-      "M17,4V2a2,2,0,0,0-2-2H9A2,2,0,0,0,7,2V4H2V6H4V21a3,3,0,0,0,3,3H17a3,3,0,0,0,3-3V6h2V4ZM11,17H9V11h2Zm4,0H13V11h2ZM15,4H9V2h6Z"
+    [
+      'bin',
+      'M17,4V2a2,2,0,0,0-2-2H9A2,2,0,0,0,7,2V4H2V6H4V21a3,3,0,0,0,3,3H17a3,3,0,0,0,3-3V6h2V4ZM11,17H9V11h2Zm4,0H13V11h2ZM15,4H9V2h6Z',
     ],
-
   ]);
-
 
   trackByIndex(index: number, item: any): number {
     return index;
@@ -62,12 +71,7 @@ export class AddTaskComponent {
     this.detailList.push('');
     if (this.subdetailList.length !== this.detailList.length) {
       this.subdetailList.push([]);
-
     }
-
-    console.log('detailList=', this.detailList);
-    console.log('subdetai=', this.subdetailList);
-    // this.subdetailList.pop();
   }
   deleteDetail() {
     this.detailList.pop();
@@ -76,20 +80,27 @@ export class AddTaskComponent {
 
   addsubDetail(x: number) {
     this.subdetailList[x].push('');
-    console.log('detailList=', this.detailList);
-    console.log('subdetai=', this.subdetailList);
   }
   deletesubDetail(x: number, y: number) {
     if (
-      x >= 0 && x < this.subdetailList.length &&
-      y >= 0 && y < this.subdetailList[x].length
+      x >= 0 &&
+      x < this.subdetailList.length &&
+      y >= 0 &&
+      y < this.subdetailList[x].length
     ) {
       this.subdetailList[x].splice(y, 1);
     }
   }
 
-
-  tags = ['Work', 'Homework', 'Coding', 'Planning','Design','Exercise','Cooking']
+  tags = [
+    'Work',
+    'Homework',
+    'Coding',
+    'Planning',
+    'Design',
+    'Exercise',
+    'Cooking',
+  ];
 
   selectTag = false;
   selectTagToggle() {
@@ -98,7 +109,7 @@ export class AddTaskComponent {
 
   tagFocus: number = -1;
   changeTag(i: number) {
-    this.tagFocus = i
+    this.tagFocus = i;
   }
 
   addtag(i: string) {
@@ -108,12 +119,11 @@ export class AddTaskComponent {
     }
     this.tag.push(i);
     this.selectTag = false;
-    console.log('tag', this.tag)
+    console.log('tag', this.tag);
   }
   deletetag(i: number) {
     this.tag.splice(i, 1);
   }
-
 
   get tagColor() {
     return this.userService.tagColor;
@@ -129,13 +139,13 @@ export class AddTaskComponent {
 
   scrollToBottom(): void {
     try {
-      this.midBox.nativeElement.scrollTop = this.midBox.nativeElement.scrollHeight;
+      this.midBox.nativeElement.scrollTop =
+        this.midBox.nativeElement.scrollHeight;
     } catch (err) {
       console.error('Scroll error:', err);
     }
   }
   //////////////////////////// add task /////////////////////////
-
 
   titleName = '';
   description = '';
@@ -147,24 +157,44 @@ export class AddTaskComponent {
   tag: Array<string> = [];
 
   addtask() {
-    console.log('detail= ', this.detailList)
-    console.log('subdetail= ', this.subdetailList)
-    fetch(`http://localhost:4000/addtask`, {
+    const payload = {
+      userid: this.userService.user?.userid,
+      title: this.titleName,
+      description: this.description,
+      category: this.tag.join(','),
+      start_time: this.startDate,
+      end_time: this.endDate,
+      type_task: this.type,
+      main_task: this.detailList,
+      sub_task: this.subdetailList,
+    };
+
+    for (const [key, value] of Object.entries(payload)) {
+      if (
+        value === undefined ||
+        value === null ||
+        value === '' ||
+        (Array.isArray(value) && value.length === 0)
+      ) {
+        alert('please fill all infomation');
+        return;
+      }
+    }
+
+   fetch(`http://localhost:4000/task`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ userid: this.userService.user?.userid, title: this.titleName, description: this.description, category: this.tag.join(','), start_time: this.startDate, end_time: this.endDate, type_task: this.type, main_task: this.detailList, sub_task: this.subdetailList })
+      body: JSON.stringify(payload),
     })
-      .then(res => res.json())
-      .then(data => {
-        console.log('data= ', data.data)
-        alert(`${data.message}`)
+      .then((res) => res.json())
+      .then((data) => {
+        console.log('data= ', data.data);
+        alert(`${data.message}`);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error('❌ Error:', err);
       });
   }
-
-
 }

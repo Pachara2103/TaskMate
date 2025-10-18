@@ -63,7 +63,7 @@ export class UserService {
 
   async getRoom(chatfocus: string) {
     try {
-      const res = await fetch(`http://localhost:4000/getallrooms?userid=${this.user?.userid}&type=${chatfocus}`, {
+      const res = await fetch(`http://localhost:4000/room?userid=${this.user?.userid}&type=${chatfocus}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
@@ -86,7 +86,7 @@ export class UserService {
   async getfriendchat(friendid: number): Promise<void> {
 
     try {
-      const res = await fetch(`http://localhost:4000/getfriendchat?userid=${this.user?.userid}&friendid=${friendid}`, {
+      const res = await fetch(`http://localhost:4000/chat/friend?userid=${this.user?.userid}&friendid=${friendid}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
@@ -107,7 +107,7 @@ export class UserService {
 
 
   async getroomchat(roomid: string) {
-    fetch(`http://localhost:4000/getroomchat?roomid=${roomid}`, {
+    fetch(`http://localhost:4000/chat/room?roomid=${roomid}`, {
       method: 'get',
       headers: {
         'Content-Type': 'application/json'
@@ -160,11 +160,6 @@ export class UserService {
   connectWs() {
     console.log('Connected to socket with username = ', this.user?.username);
     this.ws = new WebSocket(`ws://localhost:3000?userId=${this.user?.userid}`);
-    // this.ws.onopen = () => {
-    //   console.log("                                     ");
-    //   console.log("Connected to socket");
-    //   console.log("                                     ");
-    // };
 
     this.ws.onmessage = (event) => {
       const data = JSON.parse(event.data); //ถ้าข้อความที่รับมาจาก event.data เป็น JSON string แล้วคุณไม่แปลงด้วย JSON.parse() ก็จะได้เป็น string ธรรมดา
@@ -241,7 +236,7 @@ export class UserService {
 
   async getTasks(tabfocus: string) {
     try {
-      const url = `http://localhost:4000/getalltasks?userid=${this.user?.userid}&type=${tabfocus}`;
+      const url = `http://localhost:4000/task?userid=${this.user?.userid}&type=${tabfocus}`;
       const res = await fetch(url, {
         method: 'GET',
         headers: {

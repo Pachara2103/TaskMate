@@ -221,7 +221,7 @@ export class DashboardComponent implements AfterViewInit {
     const tasks = this.alltasks;
     if (tasks.length === 0) return;
 
-    const res = await fetch(`http://localhost:4000/daterange`, {
+    const res = await fetch(`http://localhost:4000/task/daterange`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
